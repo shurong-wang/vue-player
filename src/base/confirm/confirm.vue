@@ -33,25 +33,25 @@
     data() {
       return {
         showFlag: false
-      }
+      };
     },
     methods: {
       show() {
-        this.showFlag = true
+        this.showFlag = true;
       },
       hide() {
-        this.showFlag = false
+        this.showFlag = false;
       },
       cancel() {
-        this.hide()
-        this.$emit('cancel')
+        this.hide();
+        this.$emit('cancel');
       },
       confirm() {
-        this.hide()
-        this.$emit('confirm')
+        this.hide();
+        this.$emit('confirm');
       }
     }
-  }
+  };
 </script>
 
 <style scoped lang="stylus" rel="stylesheet/stylus">

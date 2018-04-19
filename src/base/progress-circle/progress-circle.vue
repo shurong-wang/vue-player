@@ -24,14 +24,14 @@
     data() {
       return {
         dashArray: Math.PI * 100
-      }
+      };
     },
     computed: {
       dashOffset() {
-        return (1 - this.percent) * this.dashArray
+        return (1 - this.percent) * this.dashArray;
       }
     }
-  }
+  };
 </script>
 
 <style scoped lang="stylus" rel="stylesheet/stylus">

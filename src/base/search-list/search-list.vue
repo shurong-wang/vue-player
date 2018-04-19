@@ -21,13 +21,13 @@
     },
     methods: {
       selectItem(item) {
-        this.$emit('select', item)
+        this.$emit('select', item);
       },
       deleteOne(item) {
-        this.$emit('delete', item)
+        this.$emit('delete', item);
       }
     }
-  }
+  };
 </script>
 
 <style scoped lang="stylus" rel="stylesheet/stylus">

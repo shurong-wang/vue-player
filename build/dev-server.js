@@ -28,14 +28,17 @@ var apiRoutes = express.Router()
 apiRoutes.get('/getDiscList', function (req, res) {
   var url = 'https://c.y.qq.com/splcloud/fcgi-bin/fcg_get_diss_by_tag.fcg'
   axios.get(url, {
+    // 设置 headers 绕过 referer 和 host 验证
     headers: {
       referer: 'https://c.y.qq.com/',
       host: 'c.y.qq.com'
     },
     params: req.query
-  }).then((response) => {
+  })
+  .then((response) => {
     res.json(response.data)
-  }).catch((e) => {
+  })
+  .catch((e) => {
     console.log(e)
   })
 })
@@ -49,7 +52,8 @@ apiRoutes.get('/lyric', function (req, res) {
       host: 'c.y.qq.com'
     },
     params: req.query
-  }).then((response) => {
+  })
+  .then((response) => {
     var ret = response.data
     if (typeof ret === 'string') {
       var reg = /^\w+\(({[^()]+})\)$/

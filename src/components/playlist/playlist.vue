@@ -41,12 +41,12 @@
 </template>
 
 <script type="text/ecmascript-6">
-  import {mapActions} from 'vuex'
-  import {playMode} from 'common/js/config'
-  import Scroll from 'base/scroll/scroll'
-  import Confirm from 'base/confirm/confirm'
-  import AddSong from 'components/add-song/add-song'
-  import {playerMixin} from 'common/js/mixin'
+  import {mapActions} from 'vuex';
+  import {playMode} from 'common/js/config';
+  import Scroll from 'base/scroll/scroll';
+  import Confirm from 'base/confirm/confirm';
+  import AddSong from 'components/add-song/add-song';
+  import {playerMixin} from 'common/js/mixin';
 
   export default {
     mixins: [playerMixin],
@@ -54,60 +54,60 @@
       return {
         showFlag: false,
         refreshDelay: 120
-      }
+      };
     },
     computed: {
       modeText() {
-        return this.mode === playMode.sequence ? '顺序播放' : this.mode === playMode.random ? '随机播放' : '单曲循环'
+        return this.mode === playMode.sequence ? '顺序播放' : this.mode === playMode.random ? '随机播放' : '单曲循环';
       }
     },
     methods: {
       show() {
-        this.showFlag = true
+        this.showFlag = true;
         setTimeout(() => {
-          this.$refs.listContent.refresh()
-          this.scrollToCurrent(this.currentSong)
-        }, 20)
+          this.$refs.listContent.refresh();
+          this.scrollToCurrent(this.currentSong);
+        }, 20);
       },
       hide() {
-        this.showFlag = false
+        this.showFlag = false;
       },
       showConfirm() {
-        this.$refs.confirm.show()
+        this.$refs.confirm.show();
       },
       confirmClear() {
-        this.deleteSongList()
-        this.hide()
+        this.deleteSongList();
+        this.hide();
       },
       getCurrentIcon(item) {
         if (this.currentSong.id === item.id) {
-          return 'icon-play'
+          return 'icon-play';
         }
-        return ''
+        return '';
       },
       selectItem(item, index) {
         if (this.mode === playMode.random) {
           index = this.playlist.findIndex((song) => {
-            return song.id === item.id
-          })
+            return song.id === item.id;
+          });
         }
-        this.setCurrentIndex(index)
-        this.setPlayingState(true)
+        this.setCurrentIndex(index);
+        this.setPlayingState(true);
       },
       scrollToCurrent(current) {
         const index = this.sequenceList.findIndex((song) => {
-          return current.id === song.id
-        })
-        this.$refs.listContent.scrollToElement(this.$refs.list.$el.children[index], 300)
+          return current.id === song.id;
+        });
+        this.$refs.listContent.scrollToElement(this.$refs.list.$el.children[index], 300);
       },
       deleteOne(item) {
-        this.deleteSong(item)
+        this.deleteSong(item);
         if (!this.playlist.length) {
-          this.hide()
+          this.hide();
         }
       },
       addSong() {
-        this.$refs.addSong.show()
+        this.$refs.addSong.show();
       },
       ...mapActions([
         'deleteSong',
@@ -117,11 +117,11 @@
     watch: {
       currentSong(newSong, oldSong) {
         if (!this.showFlag || newSong.id === oldSong.id) {
-          return
+          return;
         }
         setTimeout(() => {
-          this.scrollToCurrent(newSong)
-        }, 20)
+          this.scrollToCurrent(newSong);
+        }, 20);
       }
     },
     components: {
@@ -129,7 +129,7 @@
       Confirm,
       AddSong
     }
-  }
+  };
 </script>
 
 <style scoped lang="stylus" rel="stylesheet/stylus">

@@ -25,17 +25,17 @@
 </template>
 
 <script type="text/ecmascript-6">
-  import Scroll from 'base/scroll/scroll'
-  import Loading from 'base/loading/loading'
-  import NoResult from 'base/no-result/no-result'
-  import {search} from 'api/search'
-  import {ERR_OK} from 'api/config'
-  import {createSong} from 'common/js/song'
-  import {mapMutations, mapActions} from 'vuex'
-  import Singer from 'common/js/singer'
+  import Scroll from 'base/scroll/scroll';
+  import Loading from 'base/loading/loading';
+  import NoResult from 'base/no-result/no-result';
+  import {search} from 'api/search';
+  import {ERR_OK} from 'api/config';
+  import {createSong} from 'common/js/song';
+  import {mapMutations, mapActions} from 'vuex';
+  import Singer from 'common/js/singer';
 
-  const TYPE_SINGER = 'singer'
-  const perpage = 20
+  const TYPE_SINGER = 'singer';
+  const perpage = 20;
 
   export default {
     props: {
@@ -55,90 +55,90 @@
         beforeScroll: true,
         hasMore: true,
         result: []
-      }
+      };
     },
     methods: {
       refresh() {
-        this.$refs.suggest.refresh()
+        this.$refs.suggest.refresh();
       },
       search() {
-        this.page = 1
-        this.hasMore = true
-        this.$refs.suggest.scrollTo(0, 0)
+        this.page = 1;
+        this.hasMore = true;
+        this.$refs.suggest.scrollTo(0, 0);
         search(this.query, this.page, this.showSinger, perpage).then((res) => {
           if (res.code === ERR_OK) {
-            this.result = this._genResult(res.data)
-            this._checkMore(res.data)
+            this.result = this._genResult(res.data);
+            this._checkMore(res.data);
           }
-        })
+        });
       },
       searchMore() {
         if (!this.hasMore) {
-          return
+          return;
         }
-        this.page++
+        this.page++;
         search(this.query, this.page, this.showSinger, perpage).then((res) => {
           if (res.code === ERR_OK) {
-            this.result = this.result.concat(this._genResult(res.data))
-            this._checkMore(res.data)
+            this.result = this.result.concat(this._genResult(res.data));
+            this._checkMore(res.data);
           }
-        })
+        });
       },
       listScroll() {
-        this.$emit('listScroll')
+        this.$emit('listScroll');
       },
       selectItem(item) {
         if (item.type === TYPE_SINGER) {
           const singer = new Singer({
             id: item.singermid,
             name: item.singername
-          })
+          });
           this.$router.push({
             path: `/search/${singer.id}`
-          })
-          this.setSinger(singer)
+          });
+          this.setSinger(singer);
         } else {
-          this.insertSong(item)
+          this.insertSong(item);
         }
-        this.$emit('select', item)
+        this.$emit('select', item);
       },
       getDisplayName(item) {
         if (item.type === TYPE_SINGER) {
-          return item.singername
+          return item.singername;
         } else {
-          return `${item.name}-${item.singer}`
+          return `${item.name}-${item.singer}`;
         }
       },
       getIconCls(item) {
         if (item.type === TYPE_SINGER) {
-          return 'icon-mine'
+          return 'icon-mine';
         } else {
-          return 'icon-music'
+          return 'icon-music';
         }
       },
       _genResult(data) {
-        let ret = []
+        let ret = [];
         if (data.zhida && data.zhida.singerid) {
-          ret.push({...data.zhida, ...{type: TYPE_SINGER}})
+          ret.push({...data.zhida, ...{type: TYPE_SINGER}});
         }
         if (data.song) {
-          ret = ret.concat(this._normalizeSongs(data.song.list))
+          ret = ret.concat(this._normalizeSongs(data.song.list));
         }
-        return ret
+        return ret;
       },
       _normalizeSongs(list) {
-        let ret = []
+        let ret = [];
         list.forEach((musicData) => {
           if (musicData.songid && musicData.albummid) {
-            ret.push(createSong(musicData))
+            ret.push(createSong(musicData));
           }
-        })
-        return ret
+        });
+        return ret;
       },
       _checkMore(data) {
-        const song = data.song
+        const song = data.song;
         if (!song.list.length || (song.curnum + song.curpage * perpage) > song.totalnum) {
-          this.hasMore = false
+          this.hasMore = false;
         }
       },
       ...mapMutations({
@@ -150,7 +150,7 @@
     },
     watch: {
       query(newQuery) {
-        this.search(newQuery)
+        this.search(newQuery);
       }
     },
     components: {
@@ -158,7 +158,7 @@
       Loading,
       NoResult
     }
-  }
+  };
 </script>
 
 <style scoped lang="stylus" rel="stylesheet/stylus">

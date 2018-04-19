@@ -23,6 +23,10 @@ module.exports = {
         // allow debugger during development
         'no-debugger': process.env.NODE_ENV === 'production' ? 2 : 0,
         'eol-last': 0,
-        'space-before-function-paren': 0
+        'space-before-function-paren': 0,
+        // 允许空行结尾有空格
+        'no-trailing-spaces': ['warn', { 'skipBlankLines': true }],
+        // 强制语句分号结尾
+        'semi': ['error', 'always']
     }
 }

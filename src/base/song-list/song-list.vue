@@ -28,25 +28,25 @@
     },
     methods: {
       selectItem(item, index) {
-        this.$emit('select', item, index)
+        this.$emit('select', item, index);
       },
       getDesc(song) {
-        return `${song.singer}·${song.album}`
+        return `${song.singer}·${song.album}`;
       },
       getRankCls(index) {
         if (index <= 2) {
-          return `icon icon${index}`
+          return `icon icon${index}`;
         } else {
-          return 'text'
+          return 'text';
         }
       },
       getRankText(index) {
         if (index > 2) {
-          return index + 1
+          return index + 1;
         }
       }
     }
-  }
+  };
 </script>
 
 <style scoped lang="stylus" rel="stylesheet/stylus">

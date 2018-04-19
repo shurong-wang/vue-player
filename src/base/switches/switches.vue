@@ -21,10 +21,10 @@
     },
     methods: {
       switchItem(index) {
-        this.$emit('switch', index)
+        this.$emit('switch', index);
       }
     }
-  }
+  };
 </script>
 
 <style scoped lang="stylus" rel="stylesheet/stylus">
