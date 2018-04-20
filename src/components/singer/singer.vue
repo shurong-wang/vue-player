@@ -1,6 +1,9 @@
 <template>
   <div class="singer" ref="singer">
-    <list-view @select="selectSinger" :data="singers" ref="list"></list-view>
+    <list-view 
+      @select="selectSinger" 
+      :data="singers" 
+      ref="list" />
     <router-view></router-view>
   </div>
 </template>
@@ -59,7 +62,7 @@
               id: item.Fsinger_mid
             }));
           }
-          const key = item.Findex;
+          const key = item.Findex; // 姓氏首字母
           if (!map[key]) {
             map[key] = {
               title: key,
@@ -71,7 +74,7 @@
             id: item.Fsinger_mid
           }));
         });
-        // 为了得到有序列表，我们需要处理 map
+        // map 字典是无序的，需要进一步构建有序列表
         let ret = [];
         let hot = [];
         for (let key in map) {
@@ -82,10 +85,13 @@
             hot.push(val);
           }
         }
+        // 按姓氏首字母排序 A-Z
         ret.sort((a, b) => {
-          return a.title.charCodeAt(0) - b.title.charCodeAt(0);
+          // return a.title.charCodeAt(0) - b.title.charCodeAt(0);
+          return a.title.codePointAt(0) - b.title.codePointAt(0); // ES6
         });
-        return hot.concat(ret);
+        // return hot.concat(ret);
+        return [...hot, ...ret]; // ES6
       },
       ...mapMutations({
         setSinger: 'SET_SINGER'

@@ -1,26 +1,53 @@
 <template>
-  <scroll @scroll="scroll"
-          :listen-scroll="listenScroll"
-          :probe-type="probeType"
-          :data="data"
-          class="listview"
-          ref="listview">
+  <scroll 
+    @scroll="scroll"
+    :listen-scroll="listenScroll"
+    :probe-type="probeType"
+    :data="data"
+    class="listview"
+    ref="listview"
+  >
+    <!-- 歌手列表 -->
     <ul>
-      <li v-for="group in data" class="list-group" ref="listGroup">
+      <li 
+        v-for="(group, index) in data"
+        :key="index" 
+        class="list-group" 
+        ref="listGroup"
+      >
+        <!-- title -->
         <h2 class="list-group-title">{{group.title}}</h2>
         <uL>
-          <li @click="selectItem(item)" v-for="item in group.items" class="list-group-item">
+          <li 
+            v-for="(item, index) in group.items"
+            :key="index"
+            class="list-group-item"
+            @click="selectItem(item)" 
+          >
+            <!-- 头像 -->
             <img class="avatar" v-lazy="item.avatar">
+            <!-- 姓名 -->
             <span class="name">{{item.name}}</span>
           </li>
         </uL>
       </li>
     </ul>
-    <div class="list-shortcut" @touchstart.stop.prevent="onShortcutTouchStart" @touchmove.stop.prevent="onShortcutTouchMove"
-         @touchend.stop>
+    <!-- 姓氏导航 -->
+    <div 
+      class="list-shortcut" 
+      @touchstart.stop.prevent="onShortcutTouchStart" 
+      @touchmove.stop.prevent="onShortcutTouchMove"
+      @touchend.stop
+    >
       <ul>
-        <li v-for="(item, index) in shortcutList" :data-index="index" class="item"
-            :class="{'current':currentIndex===index}">{{item}}
+        <li 
+          v-for="(item, index) in shortcutList"
+          :key="index"
+          :data-index="index" 
+          class="item"
+          :class="{'current': currentIndex === index}"
+        >
+          {{item}}
         </li>
       </ul>
     </div>
@@ -48,48 +75,55 @@
         default: []
       }
     },
+
     computed: {
       shortcutList() {
-        return this.data.map((group) => {
-          return group.title.substr(0, 1);
-        });
+        // return this.data.map((group) => group.title.substr(0, 1));
+        return this.data.map((group) => group.title.at(0)); // ES6
+        // -> [热, A, B, C, D ...]
       },
       fixedTitle() {
         if (this.scrollY > 0) {
+          // 处理重复 titile
           return '';
         }
         return this.data[this.currentIndex] ? this.data[this.currentIndex].title : '';
       }
     },
+
     data() {
       return {
-        scrollY: -1,
-        currentIndex: 0,
-        diff: -1
+        scrollY: -1, // 实时滚动的位置
+        currentIndex: 0, // 当前姓氏导航索引
+        diff: -1 // 滚动 title 与 头部固定 title 的差
       };
     },
+
     created() {
-      this.probeType = 3;
-      this.listenScroll = true;
-      this.touch = {};
-      this.listHeight = [];
+      this.probeType = 3; // 不节流实时监听
+      this.listenScroll = true; // 监听列表滚动
+      this.touch = {}; // 记录触碰位置
+      this.listHeight = []; // 各个分组的高度
     },
+
     methods: {
       selectItem(item) {
         this.$emit('select', item);
       },
       onShortcutTouchStart(e) {
         let anchorIndex = getData(e.target, 'index');
-        let firstTouch = e.touches[0];
+        let firstTouch = e.touches[0]; // 触碰位置对象
         this.touch.y1 = firstTouch.pageY;
         this.touch.anchorIndex = anchorIndex;
-
+        
         this._scrollTo(anchorIndex);
       },
       onShortcutTouchMove(e) {
         let firstTouch = e.touches[0];
         this.touch.y2 = firstTouch.pageY;
+        // 滚动 y 轴的偏移值. 向下取整
         let delta = (this.touch.y2 - this.touch.y1) / ANCHOR_HEIGHT | 0;
+        // 滚动后的姓氏导航. 比如, 从 C 滚动到 G
         let anchorIndex = parseInt(this.touch.anchorIndex) + delta;
 
         this._scrollTo(anchorIndex);
@@ -112,6 +146,8 @@
         }
       },
       _scrollTo(index) {
+        // console.log(index);
+        // 矫正 touchstart 时的 index 值
         if (!index && index !== 0) {
           return;
         }
@@ -120,24 +156,28 @@
         } else if (index > this.listHeight.length - 2) {
           index = this.listHeight.length - 2;
         }
+        // 需要手动设置 scrollY, 确保点击姓氏导航高亮正确
         this.scrollY = -this.listHeight[index];
+        // scrollToElement 第二个参数 0 表示缓动效果动画时间
         this.$refs.listview.scrollToElement(this.$refs.listGroup[index], 0);
       }
     },
+
     watch: {
       data() {
         setTimeout(() => {
           this._calculateHeight();
-        }, 20);
+        }, 20); // 考虑兼容, 用 setTimeout 代替 $nextTick
       },
+      // 监听滚动落在列表的哪个分组区间
       scrollY(newY) {
         const listHeight = this.listHeight;
-        // 当滚动到顶部，newY>0
+        // 当滚动到顶部, newY > 0
         if (newY > 0) {
           this.currentIndex = 0;
           return;
         }
-        // 在中间部分滚动
+        // 滚动在中间部分
         for (let i = 0; i < listHeight.length - 1; i++) {
           let height1 = listHeight[i];
           let height2 = listHeight[i + 1];
@@ -147,9 +187,10 @@
             return;
           }
         }
-        // 当滚动到底部，且-newY大于最后一个元素的上限
+        // 当滚动到底部, 且 -newY 大于最后一个元素的上限
         this.currentIndex = listHeight.length - 2;
       },
+      // 向上滚动, 将头部固定 titile 顶出屏幕
       diff(newVal) {
         let fixedTop = (newVal > 0 && newVal < TITLE_HEIGHT) ? newVal - TITLE_HEIGHT : 0;
         if (this.fixedTop === fixedTop) {
@@ -159,6 +200,7 @@
         this.$refs.fixed.style.transform = `translate3d(0,${fixedTop}px,0)`;
       }
     },
+
     components: {
       Scroll,
       Loading

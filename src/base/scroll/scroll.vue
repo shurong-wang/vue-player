@@ -59,6 +59,7 @@ export default {
       if (this.listenScroll) {
         let me = this;
         this.scroll.on('scroll', pos => {
+          // 派发 pos 到父组件的 scroll 事件
           me.$emit('scroll', pos);
         });
       }
@@ -78,19 +79,23 @@ export default {
       }
     },
     disable() {
+      // call disable of BScroll
       this.scroll && this.scroll.disable();
     },
     enable() {
+      // call enable of BScroll
       this.scroll && this.scroll.enable();
     },
-    refresh() {
-      // 计算滚动列表高度
+    refresh() { // 计算滚动列表高度
+      // call refresh of BScroll
       this.scroll && this.scroll.refresh();
     },
     scrollTo() {
+      // call scrollTo of BScroll
       this.scroll && this.scroll.scrollTo.apply(this.scroll, arguments);
     },
     scrollToElement() {
+      // call scrollToElement of BScroll
       this.scroll && this.scroll.scrollToElement.apply(this.scroll, arguments);
     }
   },
