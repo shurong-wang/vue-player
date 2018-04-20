@@ -17,13 +17,15 @@ export function getRecommend() {
   return jsonp(url, data, options);
 }
 
-export function getDiscList() {
-  // 注意：
-    // 直接求 https://c.y.qq.com/splcloud/fcgi-bin/fcg_get_diss_by_tag.fcg 会对方服务器被拒绝
-    // 可以在自己的服务器上做一个路由代理：client -> /api/getDiscList -> server -> c.y.qq.com
-    // 在 dev-server.js 中, 设置 referer 和 host, 绕过对方服务器验证
-  const url = '/api/getDiscList';
+/**
+ * 注意：
+ *  直接求 https://c.y.qq.com/xxx api 会对方服务器被拒绝
+ *  可以通过 dev-server.js 代理请求：client -> dev-server -> c.y.qq.com
+ *  使用 express.Router() + axios, 伪造 headers 绕过 referer 验证
+ */
 
+export function getDiscList() {
+  const proxyUrl = '/api/getDiscList';
   const data = Object.assign({}, commonParams, {
     platform: 'yqq',
     hostUin: 0,
@@ -35,17 +37,13 @@ export function getDiscList() {
     rnd: Math.random(),
     format: 'json' // jsonp -> json
   });
-  return axios.get(url, {
-    params: data
-  })
-  .then((res) => {
-    return Promise.resolve(res.data);
-  });
+  return axios
+    .get(proxyUrl, { params: data })
+    .then(res => Promise.resolve(res.data));
 }
 
 export function getSongList(disstid) {
-  const url = 'https://c.y.qq.com/qzone/fcg-bin/fcg_ucc_getcdinfo_byids_cp.fcg';
-
+  const proxyUrl = '/api/getSongList';
   const data = Object.assign({}, commonParams, {
     disstid,
     type: 1,
@@ -56,6 +54,7 @@ export function getSongList(disstid) {
     hostUin: 0,
     needNewCode: 0
   });
-
-  return jsonp(url, data, options);
+  return axios
+    .get(proxyUrl, { params: data })
+    .then(res => Promise.resolve(res.data));
 }
