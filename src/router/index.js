@@ -1,8 +1,11 @@
 import Vue from 'vue';
 import Router from 'vue-router';
 
+// import Recommend from 'components/recommend/recommend';
+
 Vue.use(Router);
 
+// 按需加载
 const Recommend = (resolve) => {
   import('components/recommend/recommend').then((module) => {
     resolve(module);

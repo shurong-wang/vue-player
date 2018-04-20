@@ -23,6 +23,7 @@ export function getData(el, name, val) {
 
 let elementStyle = document.createElement('div').style;
 
+// 能力检测 - 确定浏览器厂商前缀
 let vendor = (() => {
   let transformNames = {
     webkit: 'webkitTransform',
@@ -41,6 +42,8 @@ let vendor = (() => {
   return false;
 })();
 
+// autoprefixer 插件只处理 CSS 文件中的样式
+// JS 动态设置的样式需要手动处理浏览器厂商前缀
 export function prefixStyle(style) {
   if (vendor === false) {
     return false;
@@ -50,5 +53,5 @@ export function prefixStyle(style) {
     return style;
   }
 
-  return vendor + style.charAt(0).toUpperCase() + style.substr(1);
+  return vendor + style.at(0).toUpperCase() + style.substr(1);
 }

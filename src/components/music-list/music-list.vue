@@ -1,6 +1,7 @@
 <template>
   <div class="music-list">
     <div class="back" @click="back">
+      <!-- 返回 -->
       <i class="icon-back"></i>
     </div>
     <h1 class="title" v-html="title"></h1>
@@ -11,35 +12,50 @@
           <span class="text">随机播放全部</span>
         </div>
       </div>
+      <!-- 歌手海报模糊 - 歌曲列表向上滚动, 模糊海报 -->
       <div class="filter" ref="filter"></div>
     </div>
+    <!-- 歌手海报遮罩 - 歌曲列表向上滚动, 覆盖海报 -->
     <div class="bg-layer" ref="layer"></div>
-    <scroll :data="songs" @scroll="scroll"
-            :listen-scroll="listenScroll" :probe-type="probeType" class="list" ref="list">
+    <!-- 歌曲列表滚动组件 -->
+    <scroll 
+      :data="songs" 
+      @scroll="scroll"
+      :listen-scroll="listenScroll" 
+      :probe-type="probeType" 
+      class="list" 
+      ref="list"
+    >
       <div class="song-list-wrapper">
-        <song-list :songs="songs" :rank="rank" @select="selectItem"></song-list>
+        <song-list 
+          :songs="songs" 
+          :rank="rank" 
+          @select="selectItem"
+        />
       </div>
       <div v-show="!songs.length" class="loading-container">
-        <loading></loading>
+        <loading />
       </div>
     </scroll>
   </div>
 </template>
 
 <script type="text/ecmascript-6">
-  import Scroll from 'base/scroll/scroll';
   import Loading from 'base/loading/loading';
+  import Scroll from 'base/scroll/scroll';
   import SongList from 'base/song-list/song-list';
   import {prefixStyle} from 'common/js/dom';
   import {playlistMixin} from 'common/js/mixin';
   import {mapActions} from 'vuex';
 
-  const RESERVED_HEIGHT = 40;
+  const RESERVED_HEIGHT = 40; // bg-layer 预留出头部标题的高度
   const transform = prefixStyle('transform');
-  const backdrop = prefixStyle('backdrop-filter');
+  const backdropFilter = prefixStyle('backdrop-filter');
+  const filter = prefixStyle('filter');
 
   export default {
     mixins: [playlistMixin],
+
     props: {
       bgImage: {
         type: String,
@@ -58,25 +74,31 @@
         default: false
       }
     },
+
     data() {
       return {
         scrollY: 0
       };
     },
+
     computed: {
       bgStyle() {
         return `background-image:url(${this.bgImage})`;
       }
     },
+
     created() {
       this.probeType = 3;
       this.listenScroll = true;
     },
+
     mounted() {
       this.imageHeight = this.$refs.bgImage.clientHeight;
+      // bg-layer 元素的最小滚动距离
       this.minTransalteY = -this.imageHeight + RESERVED_HEIGHT;
       this.$refs.list.$el.style.top = `${this.imageHeight}px`;
     },
+
     methods: {
       handlePlaylist(playlist) {
         const bottom = playlist.length > 0 ? '60px' : '';
@@ -105,36 +127,46 @@
         'randomPlay'
       ])
     },
+
     watch: {
       scrollY(newVal) {
-        let translateY = Math.max(this.minTransalteY, newVal);
-        let scale = 1;
-        let zIndex = 0;
-        let blur = 0;
+        let translateY = Math.max(this.minTransalteY, newVal); // bg-layer 滚动距离
+        let scale = 1; // 歌手海报缩放比例
+        let zIndex = 0; // 歌手海报显示层级
+        let blur = 0; // 歌手海报模糊效果
         const percent = Math.abs(newVal / this.imageHeight);
         if (newVal > 0) {
           scale = 1 + percent;
           zIndex = 10;
         } else {
-          blur = Math.min(20, percent * 20);
+          blur = Math.min(3, percent * 10);
         }
 
         this.$refs.layer.style[transform] = `translate3d(0,${translateY}px,0)`;
-        this.$refs.filter.style[backdrop] = `blur(${blur}px)`;
+        this.$refs.filter.style[backdropFilter] = `blur(${blur}px)`; // backdrop-filter  只 ios 支持
+
         if (newVal < this.minTransalteY) {
+          // 歌曲列表滚动到最顶部时
+          // 歌手海报要遮住 bg-layer, 高斯模糊, 隐藏播放按钮
           zIndex = 10;
           this.$refs.bgImage.style.paddingTop = 0;
           this.$refs.bgImage.style.height = `${RESERVED_HEIGHT}px`;
+          this.$refs.bgImage.style[filter] = `blur(0)`;
           this.$refs.playBtn.style.display = 'none';
         } else {
+          // 歌曲列表滚动到最顶部时
+          // 歌手海报和播放按钮恢复正常显示
           this.$refs.bgImage.style.paddingTop = '70%';
           this.$refs.bgImage.style.height = 0;
+          this.$refs.bgImage.style[filter] = `blur(${blur}px)`;
           this.$refs.playBtn.style.display = '';
         }
+
         this.$refs.bgImage.style[transform] = `scale(${scale})`;
         this.$refs.bgImage.style.zIndex = zIndex;
       }
     },
+
     components: {
       Scroll,
       Loading,

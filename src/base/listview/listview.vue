@@ -107,7 +107,9 @@
     },
 
     methods: {
+      // 切换进入歌手子路由
       selectItem(item) {
+        // 作为基础组件, 绑定事件不处理具体业务, 仅仅将事件和数据派发出去
         this.$emit('select', item);
       },
       onShortcutTouchStart(e) {

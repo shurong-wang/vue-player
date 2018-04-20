@@ -1,9 +1,11 @@
 <template>
   <div class="singer" ref="singer">
+    <!-- 歌手列表 -->
     <list-view 
-      @select="selectSinger" 
+      @select="selectSinger"
       :data="singers" 
       ref="list" />
+    <!-- 歌手详情 子路由 -->
     <router-view></router-view>
   </div>
 </template>
@@ -21,14 +23,17 @@
 
   export default {
     mixins: [playlistMixin],
+
     data() {
       return {
         singers: []
       };
     },
+
     created() {
       this._getSingerList();
     },
+
     methods: {
       handlePlaylist(playlist) {
         const bottom = playlist.length > 0 ? '60px' : '';
@@ -39,6 +44,7 @@
         this.$router.push({
           path: `/singer/${singer.id}`
         });
+        // 配合 mapMutations, 触发 mutation, 更新 state
         this.setSinger(singer);
       },
       _getSingerList() {
@@ -93,10 +99,12 @@
         // return hot.concat(ret);
         return [...hot, ...ret]; // ES6
       },
+      // 触发 mutation 语法糖
       ...mapMutations({
         setSinger: 'SET_SINGER'
       })
     },
+    
     components: {
       ListView
     }
