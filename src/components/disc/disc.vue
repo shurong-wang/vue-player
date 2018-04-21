@@ -1,6 +1,6 @@
 <template>
   <transition name="slide">
-    <music-list :title="title" :bg-image="bgImage" :songs="songs"></music-list>
+    <music-list :title="title" :bg-image="bgImage" :songs="songs" />
   </transition>
 </template>
 
@@ -14,23 +14,26 @@
   export default {
     computed: {
       title() {
-        return this.disc.dissname;
+        return this.disc.dissname; // this.disc from mapGetters
       },
       bgImage() {
-        return this.disc.imgurl;
+        return this.disc.imgurl; // this.disc from mapGetters
       },
       ...mapGetters([
         'disc'
       ])
     },
+
     data() {
       return {
         songs: []
       };
     },
+
     created() {
       this._getSongList();
     },
+
     methods: {
       _getSongList() {
         if (!this.disc.dissid) {
@@ -45,15 +48,15 @@
           });
       },
       _normalizeSongs(list) {
-        let ret = [];
-        list.forEach((musicData) => {
+        return list.reduce((ret, musicData) => {
           if (musicData.songid && musicData.albummid) {
             ret.push(createSong(musicData));
           }
-        });
-        return ret;
+          return ret;
+        }, []);
       }
     },
+
     components: {
       MusicList
     }

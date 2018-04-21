@@ -8,8 +8,8 @@ const state = {
   playlist: [],
   sequenceList: [],
   mode: playMode.sequence, // 播放模式 [顺序, 循环, 随机]
-  currentIndex: -1, // 正在播放歌曲的索引, 应用于[上一首, 下一首]
-  disc: {},
+  currentIndex: -1, // 正在播放歌曲的索引
+  disc: {}, // 歌单详情
   topList: {},
   searchHistory: loadSearch(),
   playHistory: loadPlay(),

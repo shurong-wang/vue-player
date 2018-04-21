@@ -33,6 +33,7 @@
           <loading></loading>
       </div>
     </scroll>
+    <!-- 二级路由 歌单详情-->
     <router-view></router-view>
   </div>
 </template>
@@ -76,11 +77,12 @@ export default {
         this.$refs.scroll.refresh();
       }
     },
+    // 选择歌单, 进入选择歌单详情
     selectItem(item) {
       this.$router.push({
         path: `/recommend/${item.dissid}`
       });
-      this.setDisc(item);
+      this.setDisc(item); // setDisc from mapMutations
     },
     _getRecommend() {
       getRecommend().then(res => {
