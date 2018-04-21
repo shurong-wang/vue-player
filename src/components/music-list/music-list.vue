@@ -7,7 +7,10 @@
     <h1 class="title" v-html="title"></h1>
     <div class="bg-image" :style="bgStyle" ref="bgImage">
       <div class="play-wrapper">
-        <div ref="playBtn" v-show="songs.length>0" class="play" @click="random">
+        <div class="play" 
+             ref="playBtn" 
+             v-show="songs.length>0" 
+             @click="random">
           <i class="icon-play"></i>
           <span class="text">随机播放全部</span>
         </div>
@@ -17,16 +20,15 @@
     </div>
     <!-- 歌手海报遮罩 - 歌曲列表向上滚动, 覆盖海报 -->
     <div class="bg-layer" ref="layer"></div>
-    <!-- 歌曲列表滚动组件 -->
-    <scroll 
-      :data="songs" 
-      @scroll="scroll"
-      :listen-scroll="listenScroll" 
-      :probe-type="probeType" 
-      class="list" 
-      ref="list"
-    >
+    <!-- 滚动组件 -->
+    <scroll :data="songs" 
+            @scroll="scroll"
+            :listen-scroll="listenScroll" 
+            :probe-type="probeType" 
+            class="list" 
+            ref="list">
       <div class="song-list-wrapper">
+        <!-- 歌曲列表组件 -->
         <song-list 
           :songs="songs" 
           :rank="rank" 
@@ -100,7 +102,8 @@
     },
 
     methods: {
-      handlePlaylist(playlist) {
+      // implement handlePlaylist of playlistMixin
+      handlePlaylist(playlist) { 
         const bottom = playlist.length > 0 ? '60px' : '';
         this.$refs.list.$el.style.bottom = bottom;
         this.$refs.list.refresh();
@@ -112,12 +115,14 @@
         this.$router.back();
       },
       selectItem(item, index) {
+        // selectPlay from mapActions
         this.selectPlay({
           list: this.songs,
           index
         });
       },
       random() {
+        // randomPlay from mapActions
         this.randomPlay({
           list: this.songs
         });

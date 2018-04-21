@@ -89,10 +89,11 @@ apiRoutes.get('/lyric', function (req, res) {
     .then((response) => {
       var ret = response.data
       if (typeof ret === 'string') {
+        // 正则匹配 'MusicJsonCallback({"retcode": 0, "lyric": "yoyoyo"})' 中 JSON 部分
         var reg = /^\w+\(({[^()]+})\)$/
-        var matches = ret.match(reg)
+        var matches = ret.match(reg) // ['MusicJsonCallback({"retcode": 0, "lyric": "yoyoyo"})', '{"retcode": 0, "lyric": "yoyoyo"}']
         if (matches) {
-          ret = JSON.parse(matches[1])
+          ret = JSON.parse(matches[1]) // {"retcode": 0, "lyric": "yoyoyo"}
         }
       }
       res.json(ret)

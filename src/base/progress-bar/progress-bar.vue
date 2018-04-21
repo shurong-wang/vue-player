@@ -2,11 +2,11 @@
   <div class="progress-bar" ref="progressBar" @click="progressClick">
     <div class="bar-inner">
       <div class="progress" ref="progress"></div>
-      <div class="progress-btn-wrapper" ref="progressBtn"
+      <div class="progress-btn-wrapper" 
+           ref="progressBtn"
            @touchstart.prevent="progressTouchStart"
            @touchmove.prevent="progressTouchMove"
-           @touchend="progressTouchEnd"
-      >
+           @touchend="progressTouchEnd">
         <div class="progress-btn"></div>
       </div>
     </div>
@@ -16,7 +16,7 @@
 <script type="text/ecmascript-6">
   import {prefixStyle} from 'common/js/dom';
 
-  const progressBtnWidth = 16;
+  const progressBtnWidth = 16; // 进度按钮(圆点)的宽度
   const transform = prefixStyle('transform');
 
   export default {
@@ -26,51 +26,54 @@
         default: 0
       }
     },
+
     created() {
       this.touch = {};
     },
+
     methods: {
       progressTouchStart(e) {
         this.touch.initiated = true;
         this.touch.startX = e.touches[0].pageX;
-        this.touch.left = this.$refs.progress.clientWidth;
+        this.touch.left = this.$refs.progress.clientWidth; // 已播放宽度
       },
       progressTouchMove(e) {
         if (!this.touch.initiated) {
           return;
         }
-        const deltaX = e.touches[0].pageX - this.touch.startX;
-        const offsetWidth = Math.min(this.$refs.progressBar.clientWidth - progressBtnWidth, Math.max(0, this.touch.left + deltaX));
+        const deltaX = e.touches[0].pageX - this.touch.startX; // 拖动过的距离
+        const barWidth = this.$refs.progressBar.clientWidth - progressBtnWidth;
+        const offsetWidth = Math.min(barWidth, Math.max(0, this.touch.left + deltaX));
         this._offset(offsetWidth);
       },
       progressTouchEnd() {
         this.touch.initiated = false;
-        this._triggerPercent();
+        this._triggerPercent(); // 设置拖动进度为播放进度
       },
       progressClick(e) {
+        // this._offset(e.offsetX); // 当点击 progressBtn 时, e.offsetX 获取有误
         const rect = this.$refs.progressBar.getBoundingClientRect();
         const offsetWidth = e.pageX - rect.left;
-        this._offset(offsetWidth);
-        // 这里当我们点击 progressBtn 的时候，e.offsetX 获取不对
-        // this._offset(e.offsetX)
+        this._offset(offsetWidth); // 用 offsetWidth 代替 e.offsetX
         this._triggerPercent();
       },
       _triggerPercent() {
         const barWidth = this.$refs.progressBar.clientWidth - progressBtnWidth;
         const percent = this.$refs.progress.clientWidth / barWidth;
-        this.$emit('percentChange', percent);
+        this.$emit('percentChange', percent); // 将播放进度派发给父组件
       },
       _offset(offsetWidth) {
         this.$refs.progress.style.width = `${offsetWidth}px`;
         this.$refs.progressBtn.style[transform] = `translate3d(${offsetWidth}px,0,0)`;
       }
     },
+    
     watch: {
       percent(newPercent) {
-        if (newPercent >= 0 && !this.touch.initiated) {
+        if (newPercent >= 0 && !this.touch.initiated) { // 拖动的优先级高于播放
           const barWidth = this.$refs.progressBar.clientWidth - progressBtnWidth;
-          const offsetWidth = newPercent * barWidth;
-          this._offset(offsetWidth);
+          const offsetWidth = newPercent * barWidth; // 已播放的宽度
+          this._offset(offsetWidth); // 更新进度
         }
       }
     }

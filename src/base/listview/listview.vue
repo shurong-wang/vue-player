@@ -9,21 +9,17 @@
   >
     <!-- 歌手列表 -->
     <ul>
-      <li 
-        v-for="(group, index) in data"
-        :key="index" 
-        class="list-group" 
-        ref="listGroup"
-      >
+      <li v-for="(group, index) in data"
+          :key="index" 
+          class="list-group" 
+          ref="listGroup">
         <!-- title -->
         <h2 class="list-group-title">{{group.title}}</h2>
         <uL>
-          <li 
-            v-for="(item, index) in group.items"
-            :key="index"
-            class="list-group-item"
-            @click="selectItem(item)" 
-          >
+          <li v-for="(item, index) in group.items"
+              :key="index"
+              class="list-group-item"
+              @click="selectItem(item)" >
             <!-- 头像 -->
             <img class="avatar" v-lazy="item.avatar">
             <!-- 姓名 -->
@@ -33,20 +29,16 @@
       </li>
     </ul>
     <!-- 姓氏导航 -->
-    <div 
-      class="list-shortcut" 
-      @touchstart.stop.prevent="onShortcutTouchStart" 
-      @touchmove.stop.prevent="onShortcutTouchMove"
-      @touchend.stop
-    >
+    <div class="list-shortcut" 
+         @touchstart.stop.prevent="onShortcutTouchStart" 
+         @touchmove.stop.prevent="onShortcutTouchMove"
+         @touchend.stop>
       <ul>
-        <li 
-          v-for="(item, index) in shortcutList"
-          :key="index"
-          :data-index="index" 
-          class="item"
-          :class="{'current': currentIndex === index}"
-        >
+        <li class="item"
+            v-for="(item, index) in shortcutList"
+            :key="index"
+            :data-index="index" 
+            :class="{'current': currentIndex === index}">
           {{item}}
         </li>
       </ul>

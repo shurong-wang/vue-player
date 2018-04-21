@@ -4,12 +4,13 @@
                 @enter="enter"
                 @after-enter="afterEnter"
                 @leave="leave"
-                @after-leave="afterLeave"
-    >
+                @after-leave="afterLeave">
+      <!-- 全屏播放器 -->
       <div class="normal-player" v-show="fullScreen">
         <div class="background">
           <img width="100%" height="100%" :src="currentSong.image">
         </div>
+        <!-- 标题区 -->
         <div class="top">
           <div class="back" @click="back">
             <i class="icon-back"></i>
@@ -17,86 +18,120 @@
           <h1 class="title" v-html="currentSong.name"></h1>
           <h2 class="subtitle" v-html="currentSong.singer"></h2>
         </div>
+        <!-- 主体区 -->
         <div class="middle"
              @touchstart.prevent="middleTouchStart"
              @touchmove.prevent="middleTouchMove"
-             @touchend="middleTouchEnd"
-        >
+             @touchend="middleTouchEnd">
+          <!-- 播放器封面(左滑隐藏 middle-l) -->
           <div class="middle-l" ref="middleL">
+            <!-- big CD 封面 -->
             <div class="cd-wrapper" ref="cdWrapper">
-              <div class="cd" :class="cdCls">
+              <div class="cd" :class="cdPlayCls">
                 <img class="image" :src="currentSong.image">
               </div>
             </div>
+            <!-- 单条歌词字幕 -->
             <div class="playing-lyric-wrapper">
               <div class="playing-lyric">{{playingLyric}}</div>
             </div>
           </div>
-          <scroll class="middle-r" ref="lyricList" :data="currentLyric && currentLyric.lines">
+          <!-- 歌词滚动列表(左滑显示 middle-r) -->
+          <scroll class="middle-r" 
+                  ref="lyricList" 
+                  :data="currentLyric && currentLyric.lines">
             <div class="lyric-wrapper">
               <div v-if="currentLyric">
-                <p ref="lyricLine"
-                   class="text"
+                <p class="text"
+                   ref="lyricLine"
                    :class="{'current': currentLineNum ===index}"
-                   v-for="(line,index) in currentLyric.lines">{{line.txt}}</p>
+                   v-for="(line,index) in currentLyric.lines"
+                   :key="index">
+                   {{line.txt}}
+                </p>
               </div>
             </div>
           </scroll>
         </div>
+        <!-- 功能区 -->
         <div class="bottom">
+          <!-- CD 海报 / 歌词 切换指示器 -->
           <div class="dot-wrapper">
             <span class="dot" :class="{'active':currentShow==='cd'}"></span>
             <span class="dot" :class="{'active':currentShow==='lyric'}"></span>
           </div>
+          <!-- 播放进度 -->
           <div class="progress-wrapper">
             <span class="time time-l">{{format(currentTime)}}</span>
             <div class="progress-bar-wrapper">
-              <progress-bar :percent="percent" @percentChange="onProgressBarChange"></progress-bar>
+              <progress-bar 
+                :percent="percent" 
+                @percentChange="onProgressBarChange"
+              />
             </div>
             <span class="time time-r">{{format(currentSong.duration)}}</span>
           </div>
+          <!-- 按钮组 -->
           <div class="operators">
-            <div class="icon i-left" @click="changeMode">
+            <!-- 播放模式 -->
+            <div class="icon i-left" @click="changeMode"><!-- changeMode from playerMixin-->
               <i :class="iconMode"></i>
             </div>
+            <!-- 上一首 -->
             <div class="icon i-left" :class="disableCls">
               <i @click="prev" class="icon-prev"></i>
             </div>
+            <!-- 暂停/播放 -->
             <div class="icon i-center" :class="disableCls">
               <i @click="togglePlaying" :class="playIcon"></i>
             </div>
+            <!-- 下一首 -->
             <div class="icon i-right" :class="disableCls">
               <i @click="next" class="icon-next"></i>
             </div>
+            <!-- 收藏 -->
             <div class="icon i-right">
-              <i @click="toggleFavorite(currentSong)" class="icon" :class="getFavoriteIcon(currentSong)"></i>
+              <i @click="toggleFavorite(currentSong)" 
+                 class="icon" 
+                :class="getFavoriteIcon(currentSong)"></i>
             </div>
           </div>
         </div>
       </div>
     </transition>
     <transition name="mini">
+      <!-- 底部 mini 播放器 -->
       <div class="mini-player" v-show="!fullScreen" @click="open">
+        <!-- mini CD 封面 -->
         <div class="icon">
-          <img :class="cdCls" width="40" height="40" :src="currentSong.image">
+          <img :class="cdPlayCls" width="40" height="40" :src="currentSong.image">
         </div>
+        <!-- 歌词歌手 -->
         <div class="text">
           <h2 class="name" v-html="currentSong.name"></h2>
           <p class="desc" v-html="currentSong.singer"></p>
         </div>
+        <!-- 播放按钮 -->
         <div class="control">
+          <!-- 进度环 -->
           <progress-circle :radius="radius" :percent="percent">
             <i @click.stop="togglePlaying" class="icon-mini" :class="miniIcon"></i>
           </progress-circle>
         </div>
+        <!-- 歌单列表按钮 需要阻止冒泡 -->
         <div class="control" @click.stop="showPlaylist">
           <i class="icon-playlist"></i>
         </div>
       </div>
     </transition>
     <playlist ref="playlist"></playlist>
-    <audio ref="audio" :src="currentSong.url" @play="ready" @error="error" @timeupdate="updateTime"
-           @ended="end"></audio>
+    <!-- HTML5 音频播放 -->
+    <audio ref="audio" 
+          :src="currentSong.url" 
+          @play="ready" 
+          @error="error" 
+          @timeupdate="updateTime"
+          @ended="end"></audio>
   </div>
 </template>
 
@@ -117,19 +152,21 @@
 
   export default {
     mixins: [playerMixin],
+
     data() {
       return {
-        songReady: false,
-        currentTime: 0,
-        radius: 32,
-        currentLyric: null,
-        currentLineNum: 0,
-        currentShow: 'cd',
-        playingLyric: ''
+        songReady: false, // 歌曲加载状态
+        currentTime: 0, // 歌曲当前播放时长
+        radius: 32, // mimi 播放器播放进度环形的半径
+        currentLyric: null, // 歌词播放对象
+        currentLineNum: 0, // 当前播放歌词行号
+        currentShow: 'cd', // 当前播放器主体区的显示(CD 封面 / 歌词幕布)
+        playingLyric: '' // 正在播放的一条歌词
       };
     },
+
     computed: {
-      cdCls() {
+      cdPlayCls() {
         return this.playing ? 'play' : 'play pause';
       },
       playIcon() {
@@ -142,6 +179,7 @@
         return this.songReady ? '' : 'disable';
       },
       percent() {
+        // 播放进度 = 已播放时长 / 总时长
         return this.currentTime / this.currentSong.duration;
       },
       ...mapGetters([
@@ -150,9 +188,11 @@
         'playing'
       ])
     },
+
     created() {
       this.touch = {};
     },
+
     methods: {
       back() {
         this.setFullScreen(false);
@@ -162,7 +202,6 @@
       },
       enter(el, done) {
         const {x, y, scale} = this._getPosAndScale();
-
         let animation = {
           0: {
             transform: `translate3d(${x}px,${y}px,0) scale(${scale})`
@@ -174,7 +213,7 @@
             transform: `translate3d(0,0,0) scale(1)`
           }
         };
-
+        // 用 JS 定义 CS3 keyframes animation - by create-keyframe-animation moudule
         animations.registerAnimation({
           name: 'move',
           animation,
@@ -183,10 +222,11 @@
             easing: 'linear'
           }
         });
-
+        // 执行 keyframes animation
         animations.runAnimation(this.$refs.cdWrapper, 'move', done);
       },
       afterEnter() {
+        // 清空 keyframes animation
         animations.unregisterAnimation('move');
         this.$refs.cdWrapper.style.animation = '';
       },
@@ -204,39 +244,44 @@
         if (!this.songReady) {
           return;
         }
-        this.setPlayingState(!this.playing);
+        this.setPlayingState(!this.playing); // setPlayingState from playerMixin
+        // 设置歌词的播放状态与歌曲的播放状态一致
         if (this.currentLyric) {
           this.currentLyric.togglePlay();
         }
       },
+      // 歌曲播放完之后的操作
       end() {
         if (this.mode === playMode.loop) {
-          this.loop();
+          this.loop(); // 循环播放
         } else {
-          this.next();
+          this.next(); // 播放下一首
         }
       },
       loop() {
         this.$refs.audio.currentTime = 0;
         this.$refs.audio.play();
         this.setPlayingState(true);
+        // 循环播放时, 重置歌词
         if (this.currentLyric) {
           this.currentLyric.seek(0);
         }
       },
       next() {
         if (!this.songReady) {
-          return;
+          return; // 防止快速切换歌曲报错
         }
         if (this.playlist.length === 1) {
+          // 列表只有一首歌曲时, 下一首即循环播放
           this.loop();
           return;
         } else {
           let index = this.currentIndex + 1;
           if (index === this.playlist.length) {
-            index = 0;
+            index = 0; // 跳回第一首歌
           }
-          this.setCurrentIndex(index);
+          this.setCurrentIndex(index); // setCurrentIndex from playerMixin
+          // 切换歌曲后自动播放
           if (!this.playing) {
             this.togglePlaying();
           }
@@ -245,17 +290,19 @@
       },
       prev() {
         if (!this.songReady) {
-          return;
+          return; // 防止快速切换歌曲报错
         }
         if (this.playlist.length === 1) {
+          // 列表只有一首歌曲时, 下一首即循环播放
           this.loop();
           return;
         } else {
           let index = this.currentIndex - 1;
           if (index === -1) {
-            index = this.playlist.length - 1;
+            index = this.playlist.length - 1; // 跳回最后一首歌
           }
           this.setCurrentIndex(index);
+          // 切换歌曲后自动播放
           if (!this.playing) {
             this.togglePlaying();
           }
@@ -273,36 +320,43 @@
         this.currentTime = e.target.currentTime;
       },
       format(interval) {
-        interval = interval | 0;
-        const minute = interval / 60 | 0;
-        const second = this._pad(interval % 60);
+        interval = interval | 0; // 向下取整
+        const minute = interval / 60 | 0; // 分
+        // const second = this._pad(interval % 60); // 秒
+        const second = (interval % 60).toString().padStart(2, '0'); // ES6
         return `${minute}:${second}`;
       },
       onProgressBarChange(percent) {
         const currentTime = this.currentSong.duration * percent;
         this.$refs.audio.currentTime = currentTime;
-        if (!this.playing) {
-          this.togglePlaying();
-        }
+        // // 拖动后是否自动触发播放
+        // if (!this.playing) {
+        //   this.togglePlaying();
+        // }
+        // 同步歌词进度
         if (this.currentLyric) {
           this.currentLyric.seek(currentTime * 1000);
         }
       },
-      getLyric() {
-        this.currentSong.getLyric().then((lyric) => {
-          if (this.currentSong.lyric !== lyric) {
-            return;
-          }
-          this.currentLyric = new Lyric(lyric, this.handleLyric);
-          if (this.playing) {
-            this.currentLyric.play();
-          }
-        }).catch(() => {
-          this.currentLyric = null;
-          this.playingLyric = '';
-          this.currentLineNum = 0;
-        });
+      palyLyric() {
+        this.currentSong
+          .getLyric()
+          .then(lyric => {
+            if (this.currentSong.lyric !== lyric) {
+              return;
+            }
+            this.currentLyric = new Lyric(lyric, this.handleLyric);
+            if (this.playing) {
+              this.currentLyric.play();
+            }
+          })
+          .catch(() => {
+            this.currentLyric = null;
+            this.playingLyric = '';
+            this.currentLineNum = 0;
+          });
       },
+      // 歌词生改变回调 - 设置当前行高亮, 滚动位置, 当前歌词字幕
       handleLyric({lineNum, txt}) {
         this.currentLineNum = lineNum;
         if (lineNum > 5) {
@@ -332,7 +386,7 @@
         const deltaX = touch.pageX - this.touch.startX;
         const deltaY = touch.pageY - this.touch.startY;
         if (Math.abs(deltaY) > Math.abs(deltaX)) {
-          return;
+          return; // y 轴滑动距离大于 x 轴滑动距离时, 停止执行
         }
         if (!this.touch.moved) {
           this.touch.moved = true;
@@ -342,7 +396,7 @@
         this.touch.percent = Math.abs(offsetWidth / window.innerWidth);
         this.$refs.lyricList.$el.style[transform] = `translate3d(${offsetWidth}px,0,0)`;
         this.$refs.lyricList.$el.style[transitionDuration] = 0;
-        this.$refs.middleL.style.opacity = 1 - this.touch.percent;
+        this.$refs.middleL.style.opacity = 1 - this.touch.percent; // 渐隐/渐显
         this.$refs.middleL.style[transitionDuration] = 0;
       },
       middleTouchEnd() {
@@ -351,7 +405,8 @@
         }
         let offsetWidth;
         let opacity;
-        if (this.currentShow === 'cd') {
+        // 滑动距离达到 10% 即完成切换
+        if (this.currentShow === 'cd') { // right to left
           if (this.touch.percent > 0.1) {
             offsetWidth = -window.innerWidth;
             opacity = 0;
@@ -360,7 +415,7 @@
             offsetWidth = 0;
             opacity = 1;
           }
-        } else {
+        } else { // left to right
           if (this.touch.percent < 0.9) {
             offsetWidth = 0;
             this.currentShow = 'cd';
@@ -373,7 +428,7 @@
         const time = 300;
         this.$refs.lyricList.$el.style[transform] = `translate3d(${offsetWidth}px,0,0)`;
         this.$refs.lyricList.$el.style[transitionDuration] = `${time}ms`;
-        this.$refs.middleL.style.opacity = opacity;
+        this.$refs.middleL.style.opacity = opacity;  // 渐隐/渐显
         this.$refs.middleL.style[transitionDuration] = `${time}ms`;
         this.touch.initiated = false;
       },
@@ -386,11 +441,12 @@
         return num;
       },
       _getPosAndScale() {
-        const targetWidth = 40;
-        const paddingLeft = 40;
-        const paddingBottom = 30;
-        const paddingTop = 80;
-        const width = window.innerWidth * 0.8;
+        const targetWidth = 40; // for mini CD
+        const paddingLeft = 40; // for mini CD
+        const paddingBottom = 30; // for mini CD
+        const paddingTop = 80; // for big CD
+        const width = window.innerWidth * 0.8; // for big CD
+        // mini CD relative to big CD
         const scale = targetWidth / width;
         const x = -(window.innerWidth / 2 - paddingLeft);
         const y = window.innerHeight - paddingTop - width / 2 - paddingBottom;
@@ -407,14 +463,17 @@
         'savePlayHistory'
       ])
     },
+
     watch: {
       currentSong(newSong, oldSong) {
         if (!newSong.id) {
           return;
         }
         if (newSong.id === oldSong.id) {
+          // 切换播放模式时, 保持当前歌曲的播放/暂停状态
           return;
         }
+        // 切换歌曲时, 重置歌词
         if (this.currentLyric) {
           this.currentLyric.stop();
           this.currentTime = 0;
@@ -422,15 +481,26 @@
           this.currentLineNum = 0;
         }
         clearTimeout(this.timer);
+        // 需要等待音频资源准备就绪
         this.timer = setTimeout(() => {
+          // 播放歌曲和歌词
           this.$refs.audio.play();
-          this.getLyric();
+          this.palyLyric();
         }, 1000);
+        // 在微信中播放时, 微信切换到后台时, JS 不再执行, 但 <audio /> 会继续将整首歌曲播放完成
+        // 此时, 应该触发的 end() 不会被执行,  就会导致 songReady 不会改变
+        // 此时, 当微信再切换回前台时, 歌曲就切换不了
+        // 所以, 用 setTimeout 代替 $nextTick, 设置一个较长的延迟
       },
       playing(newPlaying) {
         const audio = this.$refs.audio;
+        // 播放 / 暂停 - 需要等待音频资源准备就绪
         this.$nextTick(() => {
-          newPlaying ? audio.play() : audio.pause();
+          try {
+            newPlaying ? audio.play() : audio.pause();
+          } catch (error) {
+            console.warn(error);
+          }
         });
       },
       fullScreen(newVal) {
@@ -441,6 +511,7 @@
         }
       }
     },
+    
     components: {
       ProgressBar,
       ProgressCircle,

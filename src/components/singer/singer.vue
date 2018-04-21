@@ -35,6 +35,7 @@
     },
 
     methods: {
+      // implement handlePlaylist of playlistMixin
       handlePlaylist(playlist) {
         const bottom = playlist.length > 0 ? '60px' : '';
         this.$refs.singer.style.bottom = bottom;

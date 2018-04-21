@@ -9,11 +9,13 @@ function findIndex(list, song) {
   });
 }
 
+// 播放指定歌曲
 export const selectPlay = function ({commit, state}, {list, index}) {
   commit(types.SET_SEQUENCE_LIST, list);
   if (state.mode === playMode.random) {
-    let randomList = shuffle(list);
+    const randomList = shuffle(list);
     commit(types.SET_PLAYLIST, randomList);
+    // 随机播放模式下, 选择一首歌曲时, 需要矫正歌曲索引
     index = findIndex(randomList, list[index]);
   } else {
     commit(types.SET_PLAYLIST, list);
@@ -23,10 +25,11 @@ export const selectPlay = function ({commit, state}, {list, index}) {
   commit(types.SET_PLAYING_STATE, true);
 };
 
+// 随机播放歌曲
 export const randomPlay = function ({commit}, {list}) {
   commit(types.SET_PLAY_MODE, playMode.random);
   commit(types.SET_SEQUENCE_LIST, list);
-  let randomList = shuffle(list);
+  const randomList = shuffle(list);
   commit(types.SET_PLAYLIST, randomList);
   commit(types.SET_CURRENT_INDEX, 0);
   commit(types.SET_FULL_SCREEN, true);
