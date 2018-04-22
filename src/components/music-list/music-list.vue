@@ -32,7 +32,7 @@
         <song-list 
           :songs="songs" 
           :rank="rank" 
-          @select="selectItem"
+          @select="selectItem" 
         />
       </div>
       <div v-show="!songs.length" class="loading-container">
@@ -103,7 +103,7 @@
 
     methods: {
       // implement handlePlaylist of playlistMixin
-      handlePlaylist(playlist) { 
+      handlePlaylist(playlist) {
         const bottom = playlist.length > 0 ? '60px' : '';
         this.$refs.list.$el.style.bottom = bottom;
         this.$refs.list.refresh();

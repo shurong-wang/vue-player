@@ -13,7 +13,7 @@ export function getTopList() {
   return jsonp(url, data, options);
 }
 
-export function getMusicList(topid) {
+export function getTopMusicList(topid) {
   const url = 'https://c.y.qq.com/v8/fcg-bin/fcg_v8_toplist_cp.fcg';
 
   const data = Object.assign({}, commonParams, {

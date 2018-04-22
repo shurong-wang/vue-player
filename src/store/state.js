@@ -10,7 +10,7 @@ const state = {
   mode: playMode.sequence, // 播放模式 [顺序, 循环, 随机]
   currentIndex: -1, // 正在播放歌曲的索引
   disc: {}, // 歌单详情
-  topList: {},
+  topList: {}, // 排行榜详情
   searchHistory: loadSearch(),
   playHistory: loadPlay(),
   favoriteList: loadFavorite()

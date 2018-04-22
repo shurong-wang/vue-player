@@ -38,16 +38,10 @@
         return `${song.singer}·${song.album}`;
       },
       getRankCls(index) {
-        if (index <= 2) {
-          return `icon icon${index}`;
-        } else {
-          return 'text';
-        }
+        return (index <= 2) ? `icon icon${index}` : 'text';
       },
       getRankText(index) {
-        if (index > 2) {
-          return index + 1;
-        }
+        return (index <= 2) ? '' : index + 1;
       }
     }
   };

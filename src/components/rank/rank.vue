@@ -2,7 +2,10 @@
   <div class="rank" ref="rank">
     <scroll :data="topList" class="toplist" ref="toplist">
       <ul>
-        <li @click="selectItem(item)" class="item" v-for="(item, i) in topList" :key="i">
+        <li class="item" 
+            v-for="(item, i) in topList" 
+            :key="i"
+            @click="selectItem(item)">
           <div class="icon">
             <img width="100" height="100" v-lazy="item.picUrl"/>
           </div>
@@ -15,9 +18,10 @@
         </li>
       </ul>
       <div class="loading-container" v-show="!topList.length">
-        <loading></loading>
+        <loading/>
       </div>
     </scroll>
+    <!-- 二级路由 - 排行榜详情 -->
     <router-view></router-view>
   </div>
 </template>
@@ -32,18 +36,21 @@
 
   export default {
     mixins: [playlistMixin],
+
     created() {
       this._getTopList();
     },
+
     data() {
       return {
         topList: []
       };
     },
+
     methods: {
+      // implement handlePlaylist of playlistMixin
       handlePlaylist(playlist) {
         const bottom = playlist.length > 0 ? '60px' : '';
-
         this.$refs.rank.style.bottom = bottom;
         this.$refs.toplist.refresh();
       },
@@ -51,7 +58,7 @@
         this.$router.push({
           path: `/rank/${item.id}`
         });
-        this.setTopList(item);
+        this.setTopList(item); // setTopList from mapMutations
       },
       _getTopList() {
         getTopList().then((res) => {
@@ -64,6 +71,7 @@
         setTopList: 'SET_TOP_LIST'
       })
     },
+
     watch: {
       topList() {
         setTimeout(() => {
@@ -71,6 +79,7 @@
         }, 20);
       }
     },
+
     components: {
       Scroll,
       Loading
