@@ -1,7 +1,10 @@
 <template>
   <div class="search-list" v-show="searches.length">
     <transition-group name="list" tag="ul">
-      <li :key="item" class="search-item" @click="selectItem(item)" v-for="item in searches">
+      <li class="search-item" 
+          v-for="item in searches"
+          @click="selectItem(item)"
+          :key="item">
         <span class="text">{{item}}</span>
         <span class="icon" @click.stop="deleteOne(item)">
           <i class="icon-delete"></i>
@@ -21,9 +24,11 @@
     },
     methods: {
       selectItem(item) {
+        // 基础组件只将事件派发出去
         this.$emit('select', item);
       },
       deleteOne(item) {
+        // 基础组件只将事件派发出去
         this.$emit('delete', item);
       }
     }

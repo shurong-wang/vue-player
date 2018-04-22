@@ -1,15 +1,26 @@
 <template>
   <div class="search">
     <div class="search-box-wrapper">
-      <search-box ref="searchBox" @query="onQueryChange"></search-box>
+      <!-- 搜索框 -->
+      <search-box ref="searchBox" @queryChange="onQueryChange" />
+      <!-- onQueryChange form searchMixin -->
     </div>
     <div ref="shortcutWrapper" class="shortcut-wrapper" v-show="!query">
-      <scroll :refreshDelay="refreshDelay" ref="shortcut" class="shortcut" :data="shortcut">
+      <scroll ref="shortcut" 
+              class="shortcut" 
+              :data="shortcut" 
+              :refreshDelay="refreshDelay">
+      <!-- refreshDelay form searchMixin -->
         <div>
           <div class="hot-key">
             <h1 class="title">热门搜索</h1>
             <ul>
-              <li @click="addQuery(item.k)" class="item" v-for="(item, index) in hotKey" :key="index">
+              <!-- 热门词条 -->
+              <li class="item" 
+                  v-for="(item, index) in hotKey" 
+                  :key="index" 
+                  @click=" backfillQuery(item.k)">
+                  <!--  backfillQuery form searchMixin -->
                 <span>{{item.k}}</span>
               </li>
             </ul>
@@ -21,15 +32,35 @@
                 <i class="icon-clear"></i>
               </span>
             </h1>
-            <search-list @delete="deleteSearchHistory" @select="addQuery" :searches="searchHistory"></search-list>
+            <!-- 历史列表 -->
+            <search-list 
+              @delete="deleteSearchHistory" 
+              @select=" backfillQuery" 
+              :searches="searchHistory"
+            />
+            <!--  deleteSearchHistory, backfillQuery form searchMixin -->
           </div>
         </div>
       </scroll>
     </div>
-    <div class="search-result" v-show="query" ref="searchResult">
-      <suggest @listScroll="blurInput" @select="saveSearch" ref="suggest" :query="query"></suggest>
+    <div ref="searchResult" class="search-result" v-show="query">
+      <!-- 搜索建议列表 -->
+      <suggest 
+        ref="suggest"
+        @listScroll="blurInput" 
+        @select="saveSearch"  
+        :query="query"
+      />
+      <!-- blurInput, saveSearch, query from searchMixin -->
     </div>
-    <confirm ref="confirm" @confirm="clearSearchHistory" text="是否清空所有搜索历史" confirmBtnText="清空"></confirm>
+    <!-- 确认弹窗 -->
+    <confirm 
+      ref="confirm" 
+      @confirm="clearSearchHistory" 
+      text="是否清空所有搜索历史" 
+      confirmBtnText="清空"
+    />
+    <!-- 二级路由 - 歌手详情页 -->
     <router-view></router-view>
   </div>
 </template>
@@ -47,45 +78,52 @@
 
   export default {
     mixins: [playlistMixin, searchMixin],
+
     data() {
       return {
         hotKey: []
       };
     },
+
     computed: {
+      // 确保 hotKey 和 searchHistory 任一改变, 都会通知 scroll 组件
       shortcut() {
-        return this.hotKey.concat(this.searchHistory);
+        // return this.hotKey.concat(this.searchHistory);
+        return [...this.hotKey, ...this.searchHistory];
       }
     },
+
     created() {
       this._getHotKey();
     },
+
     methods: {
       // implement handlePlaylist of playlistMixin
       handlePlaylist(playlist) {
         const bottom = playlist.length > 0 ? '60px' : '';
-
         this.$refs.searchResult.style.bottom = bottom;
-        this.$refs.suggest.refresh();
-
+        this.$refs.suggest.refresh(); // 重新计算高度
         this.$refs.shortcutWrapper.style.bottom = bottom;
-        this.$refs.shortcut.refresh();
+        this.$refs.shortcut.refresh(); // 重新计算高度
       },
       showConfirm() {
         this.$refs.confirm.show();
       },
       _getHotKey() {
-        getHotKey().then((res) => {
-          if (res.code === ERR_OK) {
-            this.hotKey = res.data.hotkey.slice(0, 10);
-          }
-        });
+        getHotKey()
+          .then((res) => {
+            if (res.code === ERR_OK) {
+              this.hotKey = res.data.hotkey.slice(0, 10);
+            }
+          });
       },
       ...mapActions([
         'clearSearchHistory'
       ])
     },
+
     watch: {
+      // 观察[搜索关键字]变化
       query(newQuery) {
         if (!newQuery) {
           setTimeout(() => {
@@ -94,6 +132,7 @@
         }
       }
     },
+
     components: {
       SearchBox,
       SearchList,

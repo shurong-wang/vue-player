@@ -15,8 +15,6 @@ export default class Song {
   }
 
   getLyric() {
-    // 只负责获取歌词, 其他工作交给之后的 Promise 处理
-
     if (this.lyric) {
       return Promise.resolve(this.lyric);
     }
@@ -36,10 +34,11 @@ export default class Song {
 }
 
 export function createSong(musicData) {
+  const joinSinger = singer => singer ? singer.map(({ name }) => name).join('/') : '';
   return new Song({
     id: musicData.songid,
     mid: musicData.songmid,
-    singer: filterSinger(musicData.singer),
+    singer: joinSinger(musicData.singer),
     name: musicData.songname,
     album: musicData.albumname,
     duration: musicData.interval,
@@ -48,15 +47,3 @@ export function createSong(musicData) {
     url: `http://ip.h5.nm03.sycdn.kuwo.cn/120bdbd2a7e80b926fd4dcdcd0410b6b/5adb3176/resource/a1/19/50/1418450242.aac#${musicData.songid}`
   });
 }
-
-function filterSinger(singer) {
-  let ret = [];
-  if (!singer) {
-    return '';
-  }
-  singer.forEach((s) => {
-    ret.push(s.name);
-  });
-  return ret.join('/');
-}
-

@@ -1,13 +1,18 @@
 import * as types from './mutation-types';
 import {playMode} from 'common/js/config';
 import {shuffle} from 'common/js/util';
-import {saveSearch, clearSearch, deleteSearch, savePlay, saveFavorite, deleteFavorite} from 'common/js/cache';
+import {
+  saveSearch,
+  clearSearch,
+  deleteSearch,
+  savePlay,
+  saveFavorite,
+  deleteFavorite
+} from 'common/js/cache';
 
-function findIndex(list, song) {
-  return list.findIndex((item) => {
-    return item.id === song.id;
-  });
-}
+const findIndex = (list, song) => {
+  return list.findIndex(({ id: findId }) => findId === song.id);
+};
 
 // 播放指定歌曲
 export const selectPlay = function ({commit, state}, {list, index}) {
@@ -36,43 +41,41 @@ export const randomPlay = function ({commit}, {list}) {
   commit(types.SET_PLAYING_STATE, true);
 };
 
+// 添加歌曲到播放列表和顺序列表
 export const insertSong = function ({commit, state}, song) {
-  let playlist = state.playlist.slice();
-  let sequenceList = state.sequenceList.slice();
-  let currentIndex = state.currentIndex;
+  let playlist = [...state.playlist]; // 播放列表
+  let sequenceList = [...state.sequenceList]; // 顺序列表
+  let currentIndex = state.currentIndex; // 当前歌曲索引
+
   // 记录当前歌曲
   let currentSong = playlist[currentIndex];
-  // 查找当前列表中是否有待插入的歌曲并返回其索引
-  let fpIndex = findIndex(playlist, song);
-  // 因为是插入歌曲，所以索引+1
-  currentIndex++;
-  // 插入这首歌到当前索引位置
-  playlist.splice(currentIndex, 0, song);
-  // 如果已经包含了这首歌
-  if (fpIndex > -1) {
-    // 如果当前插入的序号大于列表中的序号
-    if (currentIndex > fpIndex) {
-      playlist.splice(fpIndex, 1);
-      currentIndex--;
-    } else {
-      playlist.splice(fpIndex + 1, 1);
-    }
+
+  // 1. 插入歌曲到[播放列表]
+  let playIndex = findIndex(playlist, song);
+  let isInPlaylist = playIndex > -1;
+  // 插入歌曲到当前歌曲的下一首
+  let insertPlayIndex = currentIndex + 1; // 插入位置
+  playlist.splice(insertPlayIndex, 0, song); // 添加歌曲
+  // 如果之前[播放列表]已包含了这首歌, 则删除之前这首歌曲
+  if (isInPlaylist) {
+    let removeIndex = insertPlayIndex > playIndex ? playIndex : playIndex + 1;
+    playlist.splice(removeIndex, 1); // 删除歌曲(去重)
+    insertPlayIndex = insertPlayIndex > playIndex ? insertPlayIndex - 1 : insertPlayIndex;
+  }
+  // 更新当前正在播放歌曲索引
+  currentIndex = insertPlayIndex;
+
+  // 2.插入歌曲到[顺序列表]
+  let sequenceIndex = findIndex(sequenceList, song);
+  let isInSequenceList = sequenceIndex > -1;
+  let insertSeqIndex = findIndex(sequenceList, currentSong) + 1; // 插入位置
+  sequenceList.splice(insertSeqIndex, 0, song); // 添加歌曲
+  if (isInSequenceList) {
+    let removeIndex = insertSeqIndex > sequenceIndex ? sequenceIndex : sequenceIndex + 1;
+    sequenceList.splice(removeIndex, 1); // 删除歌曲(去重)
   }
 
-  let currentSIndex = findIndex(sequenceList, currentSong) + 1;
-
-  let fsIndex = findIndex(sequenceList, song);
-
-  sequenceList.splice(currentSIndex, 0, song);
-
-  if (fsIndex > -1) {
-    if (currentSIndex > fsIndex) {
-      sequenceList.splice(fsIndex, 1);
-    } else {
-      sequenceList.splice(fsIndex + 1, 1);
-    }
-  }
-
+  // 3. commit to mutations
   commit(types.SET_PLAYLIST, playlist);
   commit(types.SET_SEQUENCE_LIST, sequenceList);
   commit(types.SET_CURRENT_INDEX, currentIndex);
@@ -80,14 +83,17 @@ export const insertSong = function ({commit, state}, song) {
   commit(types.SET_PLAYING_STATE, true);
 };
 
+// 保存搜索历史
 export const saveSearchHistory = function ({commit}, query) {
   commit(types.SET_SEARCH_HISTORY, saveSearch(query));
 };
 
+// 删除搜索历史
 export const deleteSearchHistory = function ({commit}, query) {
   commit(types.SET_SEARCH_HISTORY, deleteSearch(query));
 };
 
+// 清空搜索历史
 export const clearSearchHistory = function ({commit}) {
   commit(types.SET_SEARCH_HISTORY, clearSearch());
 };

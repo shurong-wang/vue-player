@@ -2,13 +2,15 @@
   <scroll ref="suggest"
           class="suggest"
           :data="result"
-          :pullup="pullup"
-          :beforeScroll="beforeScroll"
-          @scrollToEnd="searchMore"
-          @beforeScroll="listScroll"
-  >
+          :isPullup="isPullup"
+          :isBlur="isBlur"
+          @scrollToEnd="fetchMore"
+          @beforeScroll="listScroll">
     <ul class="suggest-list">
-      <li @click="selectItem(item)" class="suggest-item" v-for="item in result">
+      <li class="suggest-item"
+          v-for="(item,index) in result"
+          :key="index"
+          @click="selectItem(item)">
         <div class="icon">
           <i :class="getIconCls(item)"></i>
         </div>
@@ -16,10 +18,10 @@
           <p class="text" v-html="getDisplayName(item)"></p>
         </div>
       </li>
-      <loading v-show="hasMore" title=""></loading>
+      <loading v-show="isPullup && hasMore" title=""/>
     </ul>
     <div v-show="!hasMore && !result.length" class="no-result-wrapper">
-      <no-result title="抱歉，暂无搜索结果"></no-result>
+      <no-result title="抱歉，暂无搜索结果" />
     </div>
   </scroll>
 </template>
@@ -35,7 +37,7 @@
   import Singer from 'common/js/singer';
 
   const TYPE_SINGER = 'singer';
-  const perpage = 20;
+  const perpage = 20; // 每页数据条数
 
   export default {
     props: {
@@ -48,47 +50,52 @@
         default: ''
       }
     },
+
     data() {
       return {
         page: 1,
-        pullup: true,
-        beforeScroll: true,
+        isPullup: true, // 是否监听列表滚动到底部 -> 触发加载更多
+        isBlur: true, // 是否监听列表开始滚动 -> 触发输入框 blur 事件, 收起移动端键盘
         hasMore: true,
-        result: []
+        result: [] // 搜索结果列表
       };
     },
+
     methods: {
-      refresh() {
-        this.$refs.suggest.refresh();
+      refresh() { // 代理 Sroll 组件的 refresh 方法
+        this.$refs.suggest.refresh(); // 刷新列表, 重新计算高度
       },
-      search() {
-        this.page = 1;
+      fetchSearch() {
         this.hasMore = true;
-        this.$refs.suggest.scrollTo(0, 0);
-        search(this.query, this.page, this.showSinger, perpage).then((res) => {
-          if (res.code === ERR_OK) {
-            this.result = this._genResult(res.data);
-            this._checkMore(res.data);
-          }
-        });
+        this.page = 1; // 重置页码
+        this.$refs.suggest.scrollTo(0, 0); // 重置滚动
+        search(this.query, this.page, this.showSinger, perpage)
+          .then((res) => {
+            if (res.code === ERR_OK) {
+              this.result = this._genResult(res.data);
+              this._checkMore(res.data);
+            }
+          });
       },
-      searchMore() {
+      fetchMore() {
         if (!this.hasMore) {
           return;
         }
-        this.page++;
-        search(this.query, this.page, this.showSinger, perpage).then((res) => {
-          if (res.code === ERR_OK) {
-            this.result = this.result.concat(this._genResult(res.data));
-            this._checkMore(res.data);
-          }
-        });
+        this.page += 1;
+        search(this.query, this.page, this.showSinger, perpage)
+          .then((res) => {
+            if (res.code === ERR_OK) {
+              // this.result = this.result.concat(this._genResult(res.data));
+              this.result = [...this.result, ...this._genResult(res.data)]; // ES6
+              this._checkMore(res.data);
+            }
+          });
       },
       listScroll() {
         this.$emit('listScroll');
       },
       selectItem(item) {
-        if (item.type === TYPE_SINGER) {
+        if (item.type === TYPE_SINGER) { // 进去歌手详情页
           const singer = new Singer({
             id: item.singermid,
             name: item.singername
@@ -96,25 +103,18 @@
           this.$router.push({
             path: `/search/${singer.id}`
           });
-          this.setSinger(singer);
-        } else {
-          this.insertSong(item);
+          this.setSinger(singer); // setSinger from mapMutations
+        } else { // 添加歌曲到播放列表和顺序列表
+          this.insertSong(item); // insertSong from mapActions
         }
+        // 向父组件派发 select 事件
         this.$emit('select', item);
       },
-      getDisplayName(item) {
-        if (item.type === TYPE_SINGER) {
-          return item.singername;
-        } else {
-          return `${item.name}-${item.singer}`;
-        }
+      getDisplayName({type, singername, name, singer}) {
+        return (type === TYPE_SINGER) ? singername : `${name}-${singer}`;
       },
-      getIconCls(item) {
-        if (item.type === TYPE_SINGER) {
-          return 'icon-mine';
-        } else {
-          return 'icon-music';
-        }
+      getIconCls({type}) {
+        return (type === TYPE_SINGER) ? 'icon-mine' : 'icon-music';
       },
       _genResult(data) {
         let ret = [];
@@ -127,17 +127,17 @@
         return ret;
       },
       _normalizeSongs(list) {
-        let ret = [];
-        list.forEach((musicData) => {
+        return list.reduce((ret, musicData) => {
           if (musicData.songid && musicData.albummid) {
             ret.push(createSong(musicData));
           }
-        });
-        return ret;
+          return ret;
+        }, []);
       },
       _checkMore(data) {
         const song = data.song;
-        if (!song.list.length || (song.curnum + song.curpage * perpage) > song.totalnum) {
+        const offset = song.curnum + song.curpage * perpage;
+        if (!song.list.length || offset > song.totalnum) {
           this.hasMore = false;
         }
       },
@@ -148,11 +148,14 @@
         'insertSong'
       ])
     },
+
     watch: {
+      // 观察[搜索关键字]变化
       query(newQuery) {
-        this.search(newQuery);
+        this.fetchSearch(newQuery);
       }
     },
+
     components: {
       Scroll,
       Loading,

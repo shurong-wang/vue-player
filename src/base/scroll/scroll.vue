@@ -25,11 +25,12 @@ export default {
       type: Array,
       default: null
     },
-    pullup: {
+    isPullup: {
       type: Boolean,
       default: false
     },
-    beforeScroll: {
+    // 滚动列表时, 触发输入框 blur, 收起移动端键盘
+    isBlur: {
       type: Boolean,
       default: false
     },
@@ -40,7 +41,7 @@ export default {
   },
 
   mounted() {
-    // 此处可以用 this.$nextTick() setTimeout()
+    // this.$nextTick()
     setTimeout(() => {
       this._initScroll();
     }, 20);
@@ -64,16 +65,18 @@ export default {
         });
       }
 
-      if (this.pullup) {
+      if (this.isPullup) {
         this.scroll.on('scrollEnd', () => {
           if (this.scroll.y <= this.scroll.maxScrollY + 50) {
+            // 向父组件派发 scrollToEnd 事件
             this.$emit('scrollToEnd');
           }
         });
       }
 
-      if (this.beforeScroll) {
+      if (this.isBlur) {
         this.scroll.on('beforeScrollStart', () => {
+          // 向父组件派发 beforeScroll 事件
           this.$emit('beforeScroll');
         });
       }
@@ -86,9 +89,9 @@ export default {
       // call enable of BScroll
       this.scroll && this.scroll.enable();
     },
-    refresh() { // 计算滚动列表高度
+    refresh() { // 代理 BScroll 组件的 refresh 方法
       // call refresh of BScroll
-      this.scroll && this.scroll.refresh();
+      this.scroll && this.scroll.refresh(); // 重新计算列表高度
     },
     scrollTo() {
       // call scrollTo of BScroll

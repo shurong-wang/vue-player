@@ -2,7 +2,7 @@ import {mapGetters, mapMutations, mapActions} from 'vuex';
 import {playMode} from 'common/js/config';
 import {shuffle} from 'common/js/util';
 
-// 歌单
+// 播放列表
 export const playlistMixin = {
   computed: {
     ...mapGetters([
@@ -121,7 +121,7 @@ export const searchMixin = {
     blurInput() {
       this.$refs.searchBox.blur();
     },
-    addQuery(query) {
+    backfillQuery(query) {
       this.$refs.searchBox.setQuery(query);
     },
     saveSearch() {

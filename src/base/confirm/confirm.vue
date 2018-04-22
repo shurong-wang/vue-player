@@ -30,11 +30,13 @@
         default: '取消'
       }
     },
+
     data() {
       return {
         showFlag: false
       };
     },
+    
     methods: {
       show() {
         this.showFlag = true;

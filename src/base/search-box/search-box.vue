@@ -1,7 +1,12 @@
 <template>
   <div class="search-box">
     <i class="icon-search"></i>
-    <input ref="query" v-model="query" class="box" :placeholder="placeholder"/>
+    <input 
+      ref="query" 
+      v-model="query" 
+      class="box" 
+      :placeholder="placeholder"
+    />
     <i @click="clear" v-show="query" class="icon-dismiss"></i>
   </div>
 </template>
@@ -16,11 +21,13 @@
         default: '搜索歌曲、歌手'
       }
     },
+
     data() {
       return {
         query: ''
       };
     },
+
     methods: {
       clear() {
         this.query = '';
@@ -32,9 +39,11 @@
         this.$refs.query.blur();
       }
     },
+
     created() {
+      // 基础组件将数据派发出去
       this.$watch('query', debounce((newQuery) => {
-        this.$emit('query', newQuery);
+        this.$emit('queryChange', newQuery);
       }, 200));
     }
   };
