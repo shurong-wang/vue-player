@@ -34,6 +34,7 @@ export default {
       type: Boolean,
       default: false
     },
+    // 解决动画延迟造成列表高度计算错误
     refreshDelay: {
       type: Number,
       default: 20

@@ -37,7 +37,9 @@ export const playlistMixin = {
 export const playerMixin = {
   computed: {
     iconMode() {
-      return this.mode === playMode.sequence ? 'icon-sequence' : this.mode === playMode.loop ? 'icon-loop' : 'icon-random';
+      return this.mode === playMode.sequence
+        ? 'icon-sequence'
+        : (this.mode === playMode.loop ? 'icon-loop' : 'icon-random');
     },
     ...mapGetters([
       'sequenceList',
@@ -104,7 +106,7 @@ export const searchMixin = {
   data() {
     return {
       query: '',
-      refreshDelay: 120
+      refreshDelay: 120  // 解决动画延迟造成列表高度计算错误
     };
   },
 

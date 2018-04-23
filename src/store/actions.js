@@ -98,44 +98,44 @@ export const clearSearchHistory = function ({commit}) {
   commit(types.SET_SEARCH_HISTORY, clearSearch());
 };
 
+// 从列表中删除歌曲
 export const deleteSong = function ({commit, state}, song) {
   let playlist = state.playlist.slice();
   let sequenceList = state.sequenceList.slice();
   let currentIndex = state.currentIndex;
   let pIndex = findIndex(playlist, song);
-  playlist.splice(pIndex, 1);
+  playlist.splice(pIndex, 1); // delete song from playlist
   let sIndex = findIndex(sequenceList, song);
-  sequenceList.splice(sIndex, 1);
+  sequenceList.splice(sIndex, 1); // // delete song from sequenceList
   if (currentIndex > pIndex || currentIndex === playlist.length) {
-    currentIndex--;
+    currentIndex -= 1; // fix index
   }
 
   commit(types.SET_PLAYLIST, playlist);
   commit(types.SET_SEQUENCE_LIST, sequenceList);
   commit(types.SET_CURRENT_INDEX, currentIndex);
-
-  if (!playlist.length) {
-    commit(types.SET_PLAYING_STATE, false);
-  } else {
-    commit(types.SET_PLAYING_STATE, true);
-  }
+  commit(types.SET_PLAYING_STATE, playlist.length > 0);
 };
 
-export const deleteSongList = function ({commit}) {
+// 清空歌曲列表
+export const cleanPlaylist = function ({commit}) {
   commit(types.SET_CURRENT_INDEX, -1);
   commit(types.SET_PLAYLIST, []);
   commit(types.SET_SEQUENCE_LIST, []);
   commit(types.SET_PLAYING_STATE, false);
 };
 
+// 保存播放历史
 export const savePlayHistory = function ({commit}, song) {
   commit(types.SET_PLAY_HISTORY, savePlay(song));
 };
 
+// 保存收藏
 export const saveFavoriteList = function ({commit}, song) {
   commit(types.SET_FAVORITE_LIST, saveFavorite(song));
 };
 
+// 删除收藏
 export const deleteFavoriteList = function ({commit}, song) {
   commit(types.SET_FAVORITE_LIST, deleteFavorite(song));
 };

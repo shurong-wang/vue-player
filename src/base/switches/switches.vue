@@ -1,6 +1,9 @@
 <template>
   <ul class="switches">
-    <li class="switch-item" v-for="(item,index) in switches" :class="{'active':currentIndex === index}"
+    <li class="switch-item" 
+        v-for="(item,index) in switches" 
+        :key="index"
+        :class="{'active':activeIndex === index}"
         @click="switchItem(index)">
       <span>{{item.name}} </span>
     </li>
@@ -14,12 +17,14 @@
         type: Array,
         default: []
       },
-      currentIndex: {
+      activeIndex: {
         type: Number,
         default: 0
       }
     },
+
     methods: {
+      // 基础组件只派发事件
       switchItem(index) {
         this.$emit('switch', index);
       }

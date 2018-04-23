@@ -1,39 +1,76 @@
 <template>
   <transition name="slide">
+    <!-- 阻止冒泡 -->
     <div class="add-song" v-show="showFlag" @click.stop>
+      <!-- 关闭页面 -->
       <div class="header">
         <h1 class="title">添加歌曲到列表</h1>
         <div class="close" @click="hide">
           <i class="icon-close"></i>
         </div>
       </div>
+      <!-- 歌曲搜索框 -->
       <div class="search-box-wrapper">
-        <search-box ref="searchBox" @query="onQueryChange" placeholder="搜索歌曲"></search-box>
+        <search-box 
+          ref="searchBox" 
+          @queryChange="onQueryChange" 
+          placeholder="搜索歌曲" 
+        />
       </div>
       <div class="shortcut" v-show="!query">
-        <switches :switches="switches" :currentIndex="currentIndex" @switch="switchItem"></switches>
+        <!-- [最近播放 | 搜索历史] -->
+        <switches 
+          :switches="switches" 
+          :activeIndex="activeIndex" 
+          @switch="switchItem" 
+        />
         <div class="list-wrapper">
-          <scroll ref="songList" v-if="currentIndex===0" class="list-scroll" :data="playHistory">
+          <!-- 最近播放 列表 -->
+          <scroll ref="songList" 
+                  v-if="activeIndex===0" 
+                  class="list-scroll" 
+                  :data="playHistory">
             <div class="list-inner">
-              <song-list :songs="playHistory" @select="selectSong">
-              </song-list>
+              <song-list 
+                :songs="playHistory" 
+                @select="selectSong" 
+              />
             </div>
           </scroll>
-          <scroll :refreshDelay="refreshDelay" ref="searchList" v-if="currentIndex===1" class="list-scroll"
-                  :data="searchHistory">
+          <!-- 搜索历史 列表 -->
+          <scroll ref="searchList" 
+                  class="list-scroll" 
+                  v-if="activeIndex===1" 
+                  :data="searchHistory" 
+                  :refreshDelay="refreshDelay">
+                  <!-- searchHistory, refreshDelay from searchMixin -->
             <div class="list-inner">
-              <search-list @delete="deleteSearchHistory" @select=" backfillQuery" :searches="searchHistory"></search-list>
+              <search-list 
+                @delete="deleteSearchHistory" 
+                @select=" backfillQuery" 
+                :searches="searchHistory"
+              />
+              <!-- deleteSearchHistory, backfillQuery from searchMixin -->
             </div>
           </scroll>
         </div>
       </div>
+      <!-- 搜索结果列表 -->
       <div class="search-result" v-show="query">
-        <suggest :query="query" :showSinger="showSinger" @select="selectSuggest" @listScroll="blurInput"></suggest>
+        <suggest 
+          :query="query" 
+          :showSinger="showSinger" 
+          @select="selectSuggest" 
+          @listScroll="blurInput" 
+        />
+        <!-- query, blurInput from searchMixin -->
       </div>
+      <!-- 成功提示 -->
       <top-tip ref="topTip">
+        <!-- for slot -->
         <div class="tip-title">
           <i class="icon-ok"></i>
-          <span class="text">1首歌曲已经添加到播放列表</span>
+          <span class="text">1 首歌曲已经添加到播放列表</span>
         </div>
       </top-tip>
     </div>
@@ -54,36 +91,32 @@
 
   export default {
     mixins: [searchMixin],
+
     data() {
       return {
         showFlag: false,
         showSinger: false,
-        currentIndex: 0,
+        activeIndex: 0,
         songs: [],
         switches: [
-          {
-            name: '最近播放'
-          },
-          {
-            name: '搜索历史'
-          }
+          {name: '最近播放'},
+          {name: '搜索历史'}
         ]
       };
     },
+
     computed: {
       ...mapGetters([
         'playHistory'
       ])
     },
+
     methods: {
       show() {
         this.showFlag = true;
         setTimeout(() => {
-          if (this.currentIndex === 0) {
-            this.$refs.songList.refresh();
-          } else {
-            this.$refs.searchList.refresh();
-          }
+          // fix unable to scroll bug
+          this.$refs[this.activeIndex === 0 ? 'songList' : 'searchList'].refresh();
         }, 20);
       },
       hide() {
@@ -91,21 +124,24 @@
       },
       selectSong(song, index) {
         if (index !== 0) {
+          // 第一首歌曲是正在播放的歌曲, 忽略添加
           this.insertSong(new Song(song));
-          this.$refs.topTip.show();
+          // song 从本地存储中读取, 需要转化成 Song 的实例
         }
+        this.$refs.topTip.show();
       },
       selectSuggest() {
         this.$refs.topTip.show();
         this.saveSearch();
       },
       switchItem(index) {
-        this.currentIndex = index;
+        this.activeIndex = index;
       },
       ...mapActions([
         'insertSong'
       ])
     },
+
     components: {
       SearchBox,
       SongList,

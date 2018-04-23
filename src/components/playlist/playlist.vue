@@ -1,29 +1,40 @@
 <template>
   <transition name="list-fade">
-    <div class="playlist" @click="hide" v-show="showFlag">
+    <div class="playlist" v-show="showFlag" @click="hide">
+      <!-- 阻止事件冒泡触发到 @click="hide" -->
       <div class="list-wrapper" @click.stop>
+        <!-- 播放模式 清空列表 -->
         <div class="list-header">
           <h1 class="title">
             <i class="icon" :class="iconMode" @click="changeMode"></i>
             <span class="text">{{modeText}}</span>
-            <span class="clear" @click="showConfirm"><i class="icon-clear"></i></span>
+            <span class="clear" @click="showConfirm">
+              <i class="icon-clear"></i>
+            </span>
           </h1>
         </div>
-        <scroll ref="listContent" :data="sequenceList" class="list-content" :refreshDelay="refreshDelay">
+        <!-- 播放列表 -->
+        <scroll ref="listContent" 
+                :data="sequenceList" 
+                class="list-content" 
+                :refreshDelay="refreshDelay">
           <transition-group ref="list" name="list" tag="ul">
-            <li :key="item.id" class="item" v-for="(item,index) in sequenceList"
+            <li class="item" 
+                v-for="(item,index) in sequenceList"
+                :key="item.id" 
                 @click="selectItem(item,index)">
               <i class="current" :class="getCurrentIcon(item)"></i>
               <span class="text">{{item.name}}</span>
               <span @click.stop="toggleFavorite(item)" class="like">
                 <i :class="getFavoriteIcon(item)"></i>
               </span>
-              <span @click.stop="deleteOne(item)" class="delete">
+              <span class="delete" @click.stop="deleteOne(item)">
                 <i class="icon-delete"></i>
               </span>
             </li>
           </transition-group>
         </scroll>
+        <!-- 操作按钮 -->
         <div class="list-operate">
           <div @click="addSong" class="add">
             <i class="icon-add"></i>
@@ -34,8 +45,15 @@
           <span>关闭</span>
         </div>
       </div>
-      <confirm ref="confirm" @confirm="confirmClear" text="是否清空播放列表" confirmBtnText="清空"></confirm>
-      <add-song ref="addSong"></add-song>
+      <!-- 确认操作弹窗 -->
+      <confirm 
+        ref="confirm" 
+        @confirm="confirmClear" 
+        text="是否清空播放列表" 
+        confirmBtnText="清空"
+      />
+      <!-- 添加歌曲 -->
+      <add-song ref="addSong" />
     </div>
   </transition>
 </template>
@@ -56,17 +74,22 @@
         refreshDelay: 120
       };
     },
+
     computed: {
       modeText() {
-        return this.mode === playMode.sequence ? '顺序播放' : this.mode === playMode.random ? '随机播放' : '单曲循环';
+        return this.mode === playMode.sequence // mode from playerMixin
+          ? '顺序播放'
+          : (this.mode === playMode.random ? '随机播放' : '单曲循环');
       }
     },
+
     methods: {
       show() {
         this.showFlag = true;
         setTimeout(() => {
+          // 重新计算高度才能滚动
           this.$refs.listContent.refresh();
-          this.scrollToCurrent(this.currentSong);
+          this.scrollToCurrent(this.currentSong); // currentSong from playerMixin
         }, 20);
       },
       hide() {
@@ -76,32 +99,27 @@
         this.$refs.confirm.show();
       },
       confirmClear() {
-        this.deleteSongList();
+        this.cleanPlaylist();
         this.hide();
       },
       getCurrentIcon(item) {
-        if (this.currentSong.id === item.id) {
-          return 'icon-play';
-        }
-        return '';
+        return this.currentSong.id === item.id ? 'icon-play' : ''; // currentSong from playerMixin
       },
       selectItem(item, index) {
-        if (this.mode === playMode.random) {
-          index = this.playlist.findIndex((song) => {
-            return song.id === item.id;
-          });
+        if (this.mode === playMode.random) { // mode from playerMixin
+          index = this.playlist.findIndex(song => song.id === item.id);
         }
-        this.setCurrentIndex(index);
-        this.setPlayingState(true);
+        this.setCurrentIndex(index); // setCurrentIndex from playerMixin
+        this.setPlayingState(true); // setPlayingState from playerMixin
       },
+      // 滚动当前播放的歌曲到列表顶部
       scrollToCurrent(current) {
-        const index = this.sequenceList.findIndex((song) => {
-          return current.id === song.id;
-        });
-        this.$refs.listContent.scrollToElement(this.$refs.list.$el.children[index], 300);
+        const index = this.sequenceList.findIndex(song => current.id === song.id);
+        const currentElement = this.$refs.list.$el.children[index];
+        this.$refs.listContent.scrollToElement(currentElement, 300);
       },
       deleteOne(item) {
-        this.deleteSong(item);
+        this.deleteSong(item); // will change currentSong
         if (!this.playlist.length) {
           this.hide();
         }
@@ -111,11 +129,12 @@
       },
       ...mapActions([
         'deleteSong',
-        'deleteSongList'
+        'cleanPlaylist'
       ])
     },
+
     watch: {
-      currentSong(newSong, oldSong) {
+      currentSong(newSong, oldSong) { // currentSong from playerMixin
         if (!this.showFlag || newSong.id === oldSong.id) {
           return;
         }
@@ -124,6 +143,7 @@
         }, 20);
       }
     },
+
     components: {
       Scroll,
       Confirm,

@@ -118,13 +118,14 @@
             <i @click.stop="togglePlaying" class="icon-mini" :class="miniIcon"></i>
           </progress-circle>
         </div>
-        <!-- 歌单列表按钮 需要阻止冒泡 -->
+        <!-- 点击底部推出播放列表 需要阻止冒泡 -->
         <div class="control" @click.stop="showPlaylist">
           <i class="icon-playlist"></i>
         </div>
       </div>
     </transition>
-    <playlist ref="playlist"></playlist>
+    <!-- 底部推出播放列表 -->
+    <playlist ref="playlist" />
     <!-- HTML5 音频播放 -->
     <audio ref="audio" 
           :src="currentSong.url" 
@@ -467,10 +468,11 @@
     watch: {
       currentSong(newSong, oldSong) {
         if (!newSong.id) {
+          // 列表清空时, 停止执行后续逻辑
           return;
         }
         if (newSong.id === oldSong.id) {
-          // 切换播放模式时, 保持当前歌曲的播放/暂停状态
+          // 切换播放模式, 不引响当前歌曲播状态
           return;
         }
         // 切换歌曲时, 重置歌词

@@ -59,9 +59,7 @@ export function loadSearch() {
 
 export function savePlay(song) {
   let songs = storage.get(PLAY_KEY, []);
-  insertArray(songs, song, (item) => {
-    return song.id === item.id;
-  }, PLAY_MAX_LEN);
+  insertArray(songs, song, item => song.id === item.id, PLAY_MAX_LEN);
   storage.set(PLAY_KEY, songs);
   return songs;
 }
@@ -72,18 +70,14 @@ export function loadPlay() {
 
 export function saveFavorite(song) {
   let songs = storage.get(FAVORITE_KEY, []);
-  insertArray(songs, song, (item) => {
-    return song.id === item.id;
-  }, FAVORITE_MAX_LEN);
+  insertArray(songs, song, item => song.id === item.id, FAVORITE_MAX_LEN);
   storage.set(FAVORITE_KEY, songs);
   return songs;
 }
 
 export function deleteFavorite(song) {
   let songs = storage.get(FAVORITE_KEY, []);
-  deleteFromArray(songs, (item) => {
-    return item.id === song.id;
-  });
+  deleteFromArray(songs, item => item.id === song.id);
   storage.set(FAVORITE_KEY, songs);
   return songs;
 }
