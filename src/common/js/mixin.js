@@ -54,39 +54,26 @@ export const playerMixin = {
     changeMode() {
       const mode = (this.mode + 1) % 3;
       this.setPlayMode(mode);
-      let list = null;
-      if (mode === playMode.random) {
-        list = shuffle(this.sequenceList);
-      } else {
-        list = this.sequenceList;
-      }
+      let list = (mode === playMode.random)
+        ? shuffle(this.sequenceList)
+        : this.sequenceList;
       this.resetCurrentIndex(list); // 切换播放模式时, 保持当前正在播放的歌曲
       this.setPlaylist(list); // 修改播放列表(排序)
     },
     resetCurrentIndex(list) {
-      let index = list.findIndex((item) => {
-        return item.id === this.currentSong.id;
-      });
+      let index = list.findIndex(item => item.id === this.currentSong.id);
       this.setCurrentIndex(index);
     },
     toggleFavorite(song) {
-      if (this.isFavorite(song)) {
-        this.deleteFavoriteList(song);
-      } else {
-        this.saveFavoriteList(song);
-      }
+      this.isFavorite(song)
+        ? this.deleteFavoriteList(song)
+        : this.saveFavoriteList(song);
     },
     getFavoriteIcon(song) {
-      if (this.isFavorite(song)) {
-        return 'icon-favorite';
-      }
-      return 'icon-not-favorite';
+      return this.isFavorite(song) ? 'icon-favorite' : 'icon-not-favorite';
     },
     isFavorite(song) {
-      const index = this.favoriteList.findIndex((item) => {
-        return item.id === song.id;
-      });
-      return index > -1;
+      return this.favoriteList.findIndex(item => item.id === song.id) > -1;
     },
     ...mapMutations({
       setPlayMode: 'SET_PLAY_MODE',

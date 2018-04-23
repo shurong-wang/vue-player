@@ -89,11 +89,12 @@
             <div class="icon i-right" :class="disableCls">
               <i @click="next" class="icon-next"></i>
             </div>
-            <!-- 收藏 -->
+            <!-- 收藏歌曲 -->
             <div class="icon i-right">
-              <i @click="toggleFavorite(currentSong)" 
-                 class="icon" 
-                :class="getFavoriteIcon(currentSong)"></i>
+              <i class="icon" 
+                :class="getFavoriteIcon(currentSong)"
+                @click="toggleFavorite(currentSong)"></i>
+                <!-- getFavoriteIcon, toggleFavorite from playerMixin -->
             </div>
           </div>
         </div>

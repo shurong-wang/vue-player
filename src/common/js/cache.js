@@ -1,13 +1,13 @@
 import storage from 'good-storage';
 
 const SEARCH_KEY = '__search__';
-const SEARCH_MAX_LEN = 15; // 最多存储历史条数
+const SEARCH_MAX_LEN = 15; // 最大存储搜索历史数
 
 const PLAY_KEY = '__play__';
-const PLAY_MAX_LEN = 200;
+const PLAY_MAX_LEN = 200; // 最大存储列表歌曲数
 
 const FAVORITE_KEY = '__favorite__';
-const FAVORITE_MAX_LEN = 200;
+const FAVORITE_MAX_LEN = 200; // 最大存储歌曲收藏数
 
 const insertArray = (arr, val, compare, maxLen) => {
   const index = arr.findIndex(compare);
