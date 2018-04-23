@@ -97,10 +97,10 @@
             flex: 1
             line-height: 22px
             padding: 10px 0
-            border-top: 1px solid $color-background-d
+            border-top: 1px solid $color-text-d
             color: $color-text-d
             &.left
-              border-right: 1px solid $color-background-d
+              border-right: 1px solid $color-text-d
 
   @keyframes confirm-fadein
     0%

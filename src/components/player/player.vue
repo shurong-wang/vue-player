@@ -276,7 +276,7 @@
         if (this.playlist.length === 1) {
           // 列表只有一首歌曲时, 下一首即循环播放
           this.loop();
-          return;
+          return; // fix button state error
         } else {
           let index = this.currentIndex + 1;
           if (index === this.playlist.length) {
@@ -345,7 +345,7 @@
           .getLyric()
           .then(lyric => {
             if (this.currentSong.lyric !== lyric) {
-              return;
+              return; // 确保切换歌曲时, 歌词与歌曲对应正确
             }
             this.currentLyric = new Lyric(lyric, this.handleLyric);
             if (this.playing) {
@@ -483,7 +483,7 @@
           this.playingLyric = '';
           this.currentLineNum = 0;
         }
-        clearTimeout(this.timer);
+        this.timer && clearTimeout(this.timer);
         // 需要等待音频资源准备就绪
         this.timer = setTimeout(() => {
           // 播放歌曲和歌词
@@ -492,7 +492,7 @@
         }, 1000);
         // 在微信中播放时, 微信切换到后台时, JS 不再执行, 但 <audio /> 会继续将整首歌曲播放完成
         // 此时, 应该触发的 end() 不会被执行,  就会导致 songReady 不会改变
-        // 此时, 当微信再切换回前台时, 歌曲就切换不了
+        // 当微信再切换回前台时, 歌曲就切换不了
         // 所以, 用 setTimeout 代替 $nextTick, 设置一个较长的延迟
       },
       playing(newPlaying) {

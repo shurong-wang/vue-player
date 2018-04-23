@@ -42,7 +42,7 @@
     top: 0
     width: 100%
     z-index: 500
-    background: $color-dialog-background
+    background: $color-tip-background
     &.drop-enter-active, &.drop-leave-active
       transition: all 0.3s
     &.drop-enter, &.drop-leave-to
