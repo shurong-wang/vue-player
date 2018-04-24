@@ -5,7 +5,7 @@ import Router from 'vue-router';
 
 Vue.use(Router);
 
-// 按需加载
+// 按需加载 - by Webpack 2
 const Recommend = (resolve) => {
   import('components/recommend/recommend').then((module) => {
     resolve(module);

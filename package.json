@@ -5,9 +5,10 @@
   "author": "lecturer",
   "private": true,
   "scripts": {
-    "dev": "node build/dev-server.js",
     "start": "node build/dev-server.js",
+    "dev": "node build/dev-server.js",
     "build": "node build/build.js",
+    "prod": "node prod.server.js",
     "lint": "eslint --ext .js,.jsx,.vue src/",
     "lint-fix": "eslint --fix --ext .js,.jsx,.vue src/"
   },
