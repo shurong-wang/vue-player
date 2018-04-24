@@ -1,4 +1,4 @@
-# vue-app
+# [vue-app](http://ustbhuangyi.com/music/#/recommend)
 Vue app for learning only
 
 ### Architecture
