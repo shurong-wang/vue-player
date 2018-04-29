@@ -1,4 +1,4 @@
-# [Vue 学习项目](https://github.com/k-water/vue-music)
+# [Vue player](https://github.com/k-water/vue-music)
 
 --------
 
